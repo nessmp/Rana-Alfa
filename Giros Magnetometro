@@ -1,0 +1,75 @@
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_HMC5883_U.h>
+
+Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
+
+float heading() //Magnetometro
+{
+
+  sensors_event_t event; 
+  mag.getEvent(&event);
+   
+  float heading = atan2(event.magnetic.y, event.magnetic.x);
+  
+  float declinationAngle = 0.22;
+  heading += declinationAngle;
+
+  if(heading < 0)
+    heading += 2*PI;
+    
+  if(heading > 2*PI)
+    heading -= 2*PI;
+   
+  float headingDegrees = heading * 180/M_PI; 
+  
+  delay(30);
+  
+  return headingDegrees;
+}
+
+void izq90()
+{
+float g1,g2;
+ g1=heading();
+ g2=g1-90;
+ if(g2<0)
+ {
+  g2*=-1;
+ }
+
+ while(g1<=g2)
+ {
+  vueltaIzquierda();
+  g1=heading();
+ }
+ detenerse();
+}
+
+void der90()
+{
+float g1,g2;
+ g1=heading();
+ g2=g1-270;
+ if(g2<0)
+ {
+  g2*=-1;
+ }
+ 
+ while(g1<=g2)
+ {
+  vueltaDerecha();
+  g1=heading();
+ }
+ detenerse();
+}
+
+void setup() { 
+    if(!mag.begin())
+  {
+    
+    while(1);
+  }
+  
+  void loop() {
+  }
