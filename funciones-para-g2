@@ -16,6 +16,9 @@ void GiroDer()
 
 void GiroIzq()
 {
+  int g1;
+  int g2;
+  
   g1 = heading();
   if(g1 <= 270 && g1 >= 90)
   {
