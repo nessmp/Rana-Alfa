@@ -1,0 +1,258 @@
+byte SenIzqTrig = 43; //sensor ultrasonico izquierdo trigger
+byte SenIzqEch = 42; //sensor ultrasonico izquierdo echo
+byte SenDerTrig = 45;  //sensor ultrasonico derecha trigger
+byte SenDerEch = 44;//sensor ultrasonico derecha echo
+byte SenEnfEch = 46; //sensor ultrasonico frontal echo
+byte SenEnfTrig = 47; //sensor ultrasonico frontal trigger
+
+long tiempo; // Variable para los ultrasonicos
+long DistanciaSenEnfrente, DistanciaSenDerecha, DistanciaSenIzquierdo;//Variable para la distancia
+
+int SensorDerecha () //funcion para sensor ultrasonico derecha
+{
+  long SumaDistancias = 0;
+ long Distancia1 = 0;
+ long  Distancia2 = 0;
+ long Distancia3 = 0;
+ int iI;
+ 
+  for (iI=1; iI<=3; iI++)
+  {
+    digitalWrite(45, LOW);
+    delayMicroseconds(5);
+    digitalWrite(45, HIGH);  
+    delayMicroseconds(10);
+    tiempo=pulseIn(44, HIGH);
+    delayMicroseconds(50);
+    if ( iI==1 )
+    {
+      Distancia1 = int(0.017*tiempo);
+    }
+    else if ( iI== 2 )
+    {
+      Distancia2 = int(0.017*tiempo);
+    }
+    else if ( iI==3 )
+    {
+      Distancia3 = int(0.017*tiempo);
+    }
+   }
+
+  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
+  {
+    if (Distancia2 > Distancia3)
+    {
+      DistanciaSenDerecha = Distancia2;
+    }
+    else
+    {
+      DistanciaSenDerecha = Distancia3;
+    }
+  }
+  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
+  {
+    if (Distancia1 > Distancia3)
+    {
+      DistanciaSenDerecha = Distancia1;
+    }
+    else
+    {
+      DistanciaSenDerecha = Distancia3;
+    }
+  }
+  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
+  {
+    if (Distancia2 > Distancia1)
+    {
+      DistanciaSenDerecha = Distancia2;
+    }  
+    else 
+    {
+      DistanciaSenDerecha = Distancia1;
+    }
+  }
+  if (Distancia1 == Distancia2)
+  {
+   DistanciaSenDerecha=Distancia1;
+  }
+  if (Distancia1 == Distancia3)
+  {
+   DistanciaSenDerecha=Distancia1;
+  }
+  if (Distancia2 == Distancia3)
+  {
+   DistanciaSenDerecha=Distancia2;
+  }
+    if (Distancia2 == Distancia1)
+  {
+   DistanciaSenDerecha=Distancia2;
+  }
+
+  return DistanciaSenDerecha;
+}
+
+int SensorFrontal() //funcion para sensor ultrasonico frontal
+{
+ long SumaDistancias = 0;
+ long Distancia1 = 0;
+ long  Distancia2 = 0;
+ long Distancia3 = 0;
+ int iI;
+ 
+  for (iI=1; iI<=3; iI++)
+  {
+    digitalWrite(47, LOW);
+    delayMicroseconds(5);
+    digitalWrite(47, HIGH);  
+    delayMicroseconds(10);
+    tiempo=pulseIn(46, HIGH);
+    delayMicroseconds(50);
+    if ( iI==1 )
+    {
+      Distancia1 = int(0.017*tiempo);
+    }
+    else if ( iI== 2 )
+    {
+      Distancia2 = int(0.017*tiempo);
+    }
+    else if ( iI==3 )
+    {
+      Distancia3 = int(0.017*tiempo);
+    }
+   }
+
+  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
+  {
+    if (Distancia2 > Distancia3)
+    {
+      DistanciaSenEnfrente = Distancia2;
+    }
+    else
+    {
+      DistanciaSenEnfrente = Distancia3;
+    }
+  }
+  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
+  {
+    if (Distancia1 > Distancia3)
+    {
+      DistanciaSenEnfrente = Distancia1;
+    }
+    else
+    {
+      DistanciaSenEnfrente = Distancia3;
+    }
+  }
+  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
+  {
+    if (Distancia2 > Distancia1)
+    {
+      DistanciaSenEnfrente = Distancia2;
+    }
+    else 
+    {
+      DistanciaSenEnfrente = Distancia1;
+    }
+  }
+  if (Distancia1 == Distancia2)
+  {
+   DistanciaSenEnfrente=Distancia1;
+  }
+  if (Distancia1 == Distancia3)
+  {
+   DistanciaSenEnfrente=Distancia1;
+  }
+  if (Distancia2 == Distancia3)
+  {
+   DistanciaSenEnfrente=Distancia2;
+  }
+    if (Distancia2 == Distancia1)
+  {
+   DistanciaSenEnfrente=Distancia2;
+  }
+ return DistanciaSenEnfrente;
+}
+
+int SensorIzquierdo () //funcion para sensor izquierdo
+{
+ long SumaDistancias = 0;
+ long Distancia1 = 0;
+ long  Distancia2 = 0;
+ long Distancia3 = 0;
+ long DistanciaSenIzquierdo = 0;
+ int iI;
+ 
+  for (iI=1; iI<=3; iI++)
+  {
+    digitalWrite(43, LOW);
+    delayMicroseconds(5);
+    digitalWrite(43, HIGH);  
+    delayMicroseconds(10);
+    tiempo=pulseIn(42, HIGH);
+    delayMicroseconds(50);
+    if ( iI==1 )
+    {
+      Distancia1 = int(0.017*tiempo);
+    }
+    else if ( iI== 2 )
+    {
+      Distancia2 = int(0.017*tiempo);
+    }
+    else if ( iI==3 )
+    {
+      Distancia3 = int(0.017*tiempo);
+    }
+   }
+
+  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
+  {
+    if (Distancia2 > Distancia3)
+    {
+      DistanciaSenIzquierdo = Distancia2;
+    }
+    else
+    {
+      DistanciaSenIzquierdo = Distancia3;
+    }
+  }
+  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
+  {
+    if (Distancia1 > Distancia3)
+    {
+      DistanciaSenIzquierdo = Distancia1;
+    }
+    else
+    {
+      DistanciaSenIzquierdo = Distancia3;
+    }
+  }
+  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
+  {
+    if (Distancia2 > Distancia1)
+    {
+      DistanciaSenIzquierdo = Distancia2;
+    }
+    else 
+    {
+      DistanciaSenIzquierdo = Distancia1;
+    }
+  }
+  if (Distancia1 == Distancia2)
+  {
+   DistanciaSenIzquierdo=Distancia1;
+  }
+  if (Distancia1 == Distancia3)
+  {
+   DistanciaSenIzquierdo=Distancia1;
+  }
+  if (Distancia2 == Distancia3)
+  {
+   DistanciaSenIzquierdo=Distancia2;
+  }
+    if (Distancia2 == Distancia1)
+  {
+   DistanciaSenIzquierdo=Distancia2;
+  }
+  
+ return DistanciaSenIzquierdo;
+}
