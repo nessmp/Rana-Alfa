@@ -1,0 +1,91 @@
+
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_HMC5883_U.h>
+
+
+Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
+
+void displaySensorDetails(void)
+{
+  sensor_t sensor;
+  mag.getSensor(&sensor);
+  Serial.println("------------------------------------");
+  Serial.print  ("Sensor:       "); Serial.println(sensor.name);
+  Serial.print  ("Driver Ver:   "); Serial.println(sensor.version);
+  Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
+  Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" uT");
+  Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" uT");
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" uT");  
+  Serial.println("------------------------------------");
+  Serial.println("");
+  delay(500);
+}
+
+void setup(void) 
+{
+  Serial.begin(9600);
+  Serial.println("HMC5883 Magnetometer Test"); Serial.println("");
+  
+ 
+  if(!mag.begin())
+  {
+   
+    Serial.println("Ooops, no HMC5883 detected ... Check your wiring!");
+    while(1);
+  }
+  
+  
+  displaySensorDetails();
+}
+
+void loop(void) 
+{
+
+  sensors_event_t event; 
+  mag.getEvent(&event);
+ 
+
+
+
+  
+  float heading = atan2(event.magnetic.y, event.magnetic.x);
+  
+ 
+  float declinationAngle = 0.087;
+  heading += declinationAngle;
+  
+ 
+  if(heading < 0)
+    heading += 2*PI;
+    
+ 
+  if(heading > 2*PI)
+    heading -= 2*PI;
+   
+  // Convert radians to degrees for readability.
+  int headingDegrees = heading * 180/M_PI; 
+
+//AQUI ESTAN LOS PINSHIS MAPEOS
+//AQUI ESTAN LOS PINSHIS MAPEOS
+  if (headingDegrees<=86)
+  {
+    headingDegrees=map(headingDegrees,0,86,0,90); 
+  }
+    if (headingDegrees<=200 && headingDegrees>86)
+  {
+    headingDegrees=map(headingDegrees,87,200,91,180); 
+  }
+     if (headingDegrees<=289 && headingDegrees>200)
+  {
+    headingDegrees=map(headingDegrees,201,289,181,270); 
+  }
+       if (headingDegrees<=359 && headingDegrees>289)
+  {
+    headingDegrees=map(headingDegrees,290,359,271,359); 
+  }
+  
+  Serial.print("Heading (degrees): "); Serial.println(headingDegrees);
+  
+  delay(500);
+}
