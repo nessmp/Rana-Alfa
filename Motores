@@ -1,0 +1,99 @@
+byte Aa = 4; //motor adelante derecha
+byte Ab = 5; //motor adelante derecha
+byte Ba = 2; //motor atras derecha
+byte Bb = 3; //motor atras derecha
+byte Ca = 6; //motor adelante izq
+byte Cb = 7; //motor adelante izq 
+byte Da = 8; //motor atras izq
+byte Db = 9; //motor atras izq  
+
+int Avel = 255; // Adelante, derrecha.
+int Bvel = 255; // Atras, derecha.
+int Cvel = 238; // Adelante, izquerda.   (Siempre hay que disminuir en 17 los motores izquierdos.)
+int Dvel = 238; // Atras, izquierda.
+
+void setup() {
+  Serial.begin (9600);
+  pinMode (Aa, OUTPUT);
+  pinMode (Ab, OUTPUT);
+  pinMode (Ba, OUTPUT);
+  pinMode (Bb, OUTPUT);
+  pinMode (Ca, OUTPUT);
+  pinMode (Cb, OUTPUT);
+  pinMode (Da, OUTPUT);
+  pinMode (Db, OUTPUT);
+}
+
+void avanzar(){ //funcion para avanzar
+  
+  analogWrite (Aa, Avel);
+  analogWrite (Ab, LOW);
+  
+  analogWrite (Ba, Bvel);
+  analogWrite (Bb, LOW);
+  
+  analogWrite (Ca, Cvel);
+  analogWrite (Cb, LOW); 
+  
+  analogWrite (Da, Dvel);
+  analogWrite (Db, LOW);
+}
+
+void detenerse(){ //funcion para detenerse
+  
+  analogWrite (Aa, LOW);
+  analogWrite (Ab, Avel);
+  
+  analogWrite (Ba, LOW);
+  analogWrite (Bb, Bvel);
+  
+  analogWrite (Ca, LOW);
+  analogWrite (Cb, Cvel); 
+  
+  analogWrite (Da, LOW);
+  analogWrite (Db, Dvel);  
+
+  delay(100); // ABS
+
+  analogWrite (Aa, LOW);
+  analogWrite (Ab, LOW);
+  
+  analogWrite (Ba, LOW);
+  analogWrite (Bb, LOW);
+  
+  analogWrite (Ca, LOW);
+  analogWrite (Cb, LOW); 
+  
+  analogWrite (Da, LOW);
+  analogWrite (Db, LOW);
+}
+
+void vueltaIzquierda() //funcion para dar vuelta a la derecha
+{ 
+  analogWrite (Aa, Avel); //HIGH
+  analogWrite (Ab, LOW);  //LOW
+  analogWrite (Ba, Bvel); //HIGH
+  analogWrite (Bb, LOW);  //LOW
+  analogWrite (Ca, LOW);  //LOW
+  analogWrite (Cb, Cvel); //HIGH 
+  analogWrite (Da, LOW);  //LOW
+  analogWrite (Db, Dvel); //HIGH
+}
+
+void vueltaDerecha(){ //funcion para dar vuelta a la izquierda 
+
+  
+  analogWrite (Aa, LOW);  //LOW
+  analogWrite (Ab, Avel); //HIGH
+  analogWrite (Ba, LOW);  //LOW
+  analogWrite (Bb, Bvel); //HIGH
+  analogWrite (Ca, Cvel); //HIGH
+  analogWrite (Cb, LOW);  //LOW
+  analogWrite (Da, Dvel); //HIGH
+  analogWrite (Db, LOW);  //LOW
+}
+void loop() { 
+
+ 
+
+}
