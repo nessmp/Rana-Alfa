@@ -57,7 +57,7 @@ void setup() {
   pinMode(SenDerEch, INPUT);
   pinMode(SenEnfEch, INPUT);
   pinMode(SenIzqTrig, OUTPUT);
-  pinMode(SenDerTrid, OUTPUT);
+  pinMode(SenDerTrig, OUTPUT);
   pinMode(SenEnfTrig, OUTPUT);
   digitalWrite(s0, HIGH);  
   digitalWrite(s1, HIGH);
@@ -310,7 +310,7 @@ void izquierda270()
   detenerse();
 }
 
-string color()  
+String color()  
 {    
   digitalWrite(s2, LOW);  
   digitalWrite(s3, LOW);  
@@ -339,6 +339,7 @@ string color()
   {
     colon = "red";
   }
+  return colon;
 }
 
 int SensorDerecha () //funcion para sensor ultrasonico derecha
@@ -588,6 +589,20 @@ int SensorIzquierdo () //funcion para sensor izquierdo
   }
   
  return DistanciaSenIzquierdo;
+}
+
+void adelante30()
+{
+  int iPos = SensorFrontal();
+  int iDist = iPos - 30;
+
+
+  while(iPos > iDist)
+  {
+    avanzar();
+    iPos = SensorFrontal();
+  }
+  detenerse();
 }
 
 void loop() {
