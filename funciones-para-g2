@@ -1,33 +1,27 @@
-
-
 void derecha90()
 {
   int g1 = heading();
   int g2 = g1 + 90;
-
-  bool con = false;
-
-  while(con == false)
+  if(g2 > 360)
   {
-    if(g1 < 270)
+    g2 -= 360;
+  }
+  bool cont = false;
+  while (cont == false)
+  {
+    if(g1 <= g2)
     {
-      while(g1 < g2)
+      vueltaDerecha();
+      g1 = heading();
+      if(g1 >= g2)
       {
-        vueltaDerecha();
-        g1 = heading();
-        if(g1 >= g2)
-        {
-          con = true;
-        }
+        cont = true;
       }
     }
-    else if(g1 >= 270)
+    else if(g1 > g2)
     {
-      while(g1 > g2)
-      {
-        vueltaDerecha();
-        g1=heading();
-      }
+      vueltaDerecha();
+      g1=heading();
     }
   }
   detenerse();
@@ -38,30 +32,26 @@ void derecha270()
 {
   int g1 = heading();
   int g2 = g1 - 90;
-
-  bool con = false;
-
-  while(con == false)
+  if(g2 < 0)
   {
-    if(g1 < 270)
+    g2 += 360;
+  }
+  bool cont = false;
+  while(cont == false)
+  {
+    if(g1 <= g2)
     {
-      while(g1 < g2)
+      if(g1 >= g2)
       {
-        vueltaDerecha();
-        g1 = heading();
-        if(g1 >= g2)
-        {
-          con = true;
-        }
+        cont = true;
       }
+      vueltaDerecha();
+      g1 = heading();
     }
-    else if(g1 >= 270)
+    else if(g1 > g2)
     {
-      while(g1 > g2)
-      {
-        vueltaDerecha();
-        g1=heading();
-      }
+      vueltaDerecha();
+      g1 = heading();
     }
   }
   detenerse();
@@ -69,32 +59,30 @@ void derecha270()
 
 void izquierda90()
 {
-  int g1 = heading();
-  int g2 = g1 - 90;
-
-  bool con = false;
-
-  while(con == false)
+  int g1=heading();
+  int g2=g1 - 90;
+  if(g2 < 0)
   {
-    if(g1 < 270)
+    g2 += 360;
+  }
+  bool cont = false;
+
+  while(cont == false)
+  {
+    if (g1 >= g2)
     {
-      while(g1 < g2)
+      if(g1 <= g2)
       {
-        vueltaIzquierda();
-        g1 = heading();
-        if(g1 >= g2)
-        {
-          con = true;
-        }
+        cont = true;
       }
+      vueltaIzquierda();
+      g1 = heading();
+      
     }
-    else if(g1 >= 270)
+    else if(g1 < g2)
     {
-      while(g1 > g2)
-      {
-        vueltaIzquierda();
-        g1=heading();
-      }
+      vueltaIzquierda();
+      g1=heading();
     }
   }
   detenerse();
@@ -104,32 +92,27 @@ void izquierda270()
 {
   int g1 = heading();
   int g2 = g1 + 90;
-
-  bool con = false;
-
-  while(con == false)
+  if (g2 > 360)
   {
-    if(g1 < 270)
+    g2 -= 360;
+  }
+  bool cont = false;
+  while(cont == false)
+  {
+    if( g1 >= g2)
     {
-      while(g1 < g2)
+      if(g1 <= g2)
       {
-        vueltaIzquierda();
-        g1 = heading();
-        if(g1 >= g2)
-        {
-          con = true;
-        }
+        cont = true;
       }
+      vueltaIzquierda();
+      g1 = heading();
     }
-    else if(g1 >= 270)
+    else if(g1 < g2)
     {
-      while(g1 > g2)
-      {
-        vueltaIzquierda();
-        g1=heading();
-      }
+      vueltaIzquierda();
+      g1 = heading();
     }
   }
   detenerse();
 }
-
