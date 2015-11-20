@@ -310,7 +310,7 @@ void izquierda270()
   detenerse();
 }
 
-void color()  
+string color()  
 {    
   digitalWrite(s2, LOW);  
   digitalWrite(s3, LOW);  
