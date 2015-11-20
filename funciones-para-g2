@@ -1,31 +1,135 @@
-void GiroDer()
+
+
+void derecha90()
 {
-  int g1;
-  int g2;
-  
-  g1 = heading();
-  if((g1 >= 270 && g1 <= 359) || (g1 >= 0 && g1 <= 90))
+  int g1 = heading();
+  int g2 = g1 + 90;
+
+  bool con = false;
+
+  while(con == false)
   {
-    g2 = acos(cos(g1 + 90));
+    if(g1 < 270)
+    {
+      while(g1 < g2)
+      {
+        vueltaDerecha();
+        g1 = heading();
+        if(g1 >= g2)
+        {
+          con = true;
+        }
+      }
+    }
+    else if(g1 >= 270)
+    {
+      while(g1 > g2)
+      {
+        vueltaDerecha();
+        g1=heading();
+      }
+    }
   }
-  else if(g1 < 270 && g1 > 90)
-  {
-    g2 = ((g1 - 90) * 2) + (acos(cos(g1 + 90)));
-  }
+  detenerse();
 }
 
-void GiroIzq()
+ 
+void derecha270()
 {
-  int g1;
-  int g2;
-  
-  g1 = heading();
-  if(g1 <= 270 && g1 >= 90)
+  int g1 = heading();
+  int g2 = g1 - 90;
+
+  bool con = false;
+
+  while(con == false)
   {
-    g2 = acos(cos(g1 - 90));
+    if(g1 < 270)
+    {
+      while(g1 < g2)
+      {
+        vueltaDerecha();
+        g1 = heading();
+        if(g1 >= g2)
+        {
+          con = true;
+        }
+      }
+    }
+    else if(g1 >= 270)
+    {
+      while(g1 > g2)
+      {
+        vueltaDerecha();
+        g1=heading();
+      }
+    }
   }
-  else if((g1 > 270 && g1 <= 359) || (g1 >= 0 && g1 < 90))
-  {
-    g2 = -1 * ((acos(cos(g1-90))) - 360);
-  }
+  detenerse();
 }
+
+void izquierda90()
+{
+  int g1 = heading();
+  int g2 = g1 - 90;
+
+  bool con = false;
+
+  while(con == false)
+  {
+    if(g1 < 270)
+    {
+      while(g1 < g2)
+      {
+        vueltaIzquierda();
+        g1 = heading();
+        if(g1 >= g2)
+        {
+          con = true;
+        }
+      }
+    }
+    else if(g1 >= 270)
+    {
+      while(g1 > g2)
+      {
+        vueltaIzquierda();
+        g1=heading();
+      }
+    }
+  }
+  detenerse();
+}
+
+void izquierda270()
+{
+  int g1 = heading();
+  int g2 = g1 + 90;
+
+  bool con = false;
+
+  while(con == false)
+  {
+    if(g1 < 270)
+    {
+      while(g1 < g2)
+      {
+        vueltaIzquierda();
+        g1 = heading();
+        if(g1 >= g2)
+        {
+          con = true;
+        }
+      }
+    }
+    else if(g1 >= 270)
+    {
+      while(g1 > g2)
+      {
+        vueltaIzquierda();
+        g1=heading();
+      }
+    }
+  }
+  detenerse();
+}
+
