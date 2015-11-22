@@ -1,0 +1,148 @@
+void FinDer()
+{
+  adelantetiempo();
+  detenerse();
+  delay(10);
+  String sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+  }
+  else 
+  {
+    derecha90();
+  }
+  detenerse();
+  delay(10);
+}
+
+void FinIzq()
+{
+  String sColor = color();
+  if(sColor == "green")
+  {
+    derecha270();
+  }
+  else
+  {
+    izquierda90();
+  }
+  detenerse();
+  delay(10);
+}
+
+void Empieza()
+{
+  int iDistancia = SensorFrontal();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    avanzar();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    sColor = color();
+    iDistancia == SensorFrontal();
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+  }
+  else 
+  {
+    derecha90();
+  }
+  detenerse();
+  delay(10);
+}
+
+void continua()
+{
+  int iDistancia = SensorFrontal();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    sColor = color();
+    avanzar();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    iDistancia == SensorFrontal();
+    sColor = color();
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  if(sColor == "green")
+  {
+    derecha270();
+  }
+  else
+  {
+    izquierda90();
+  }
+  detenerse();
+  delay(10);
+  adelantetiempo();
+  detenerse();
+  delay(10);
+}
+
+void regreso()
+{
+  String sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+    detenerse();
+    delay(10);
+  }
+  else
+  {
+    derecha90();
+    detenerse();
+    delay(10);
+  }
+  sColor = color();
+  while (sColor != "plateado")
+  {
+    avanzar();
+    sColor = color();
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+  }
+  detenerse();
+  delay(10);
+}
+void SecUno()
+{
+  Empieza();
+  FinDer();
+  continua();
+  FinIzq();
+  Empieza();
+  FinDer();
+  continua();
+  regreso();
+}
