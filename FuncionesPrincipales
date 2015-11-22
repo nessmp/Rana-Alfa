@@ -609,3 +609,20 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 }
+
+// Esta funcion mandara un TRUE si el sensor detecta un pared y False si es que no encuentra
+//Para que funciones solo debes mandar a llamar la funcion ChecarPared y dentro de ella el sensor que se va a medir, por ejemplo ChecarPared(SensorIzquierdo())
+//Se puede cambiar los valores de para detectar si ahi pared o no
+bool ChecarPared(int sensor)
+{
+  bool Pared;
+  if (sensor > 3.0 && sensor < 7.5 )// Aqui solo cambias la distancia
+  {
+    bool Pared = HIGH; // Aqui marca que si ahi pared
+  }
+  else if (sensor >=7.5)
+  {
+    bool Pared= Low; // Aqui no ahi pared
+  }
+
+}
