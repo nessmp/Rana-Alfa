@@ -1,0 +1,87 @@
+void zonac()
+{
+  String color;
+  int cont, distancia;
+  cont=0;
+  distancia=SensorFrontal();
+  color=color();
+  //recorre la primera hilera
+  while(distancia>7)
+  {
+    adelantetiempo();
+    color=color();
+    if(color=="black")
+    {
+      cont++;
+    }
+    distancia=SensorFrontal();
+  }
+
+  derecha90(); 
+  adelantetiempo();
+  derecha90(); 
+
+    //recorre la segunda hilera
+  while(distancia>7)
+  {
+    adelantetiempo();
+    color=color();
+    if(color=="black")
+    {
+      cont++;
+    }
+    distancia=SensorFrontal();
+  }
+
+   izquierda90(); 
+  adelantetiempo();
+  izquierda90();
+
+      //recorre la tercera hilera
+  while(distancia>7)
+  {
+    adelantetiempo();
+    color=color();
+    if(color=="black")
+    {
+      cont++;
+    }
+    distancia=SensorFrontal();
+  }
+  //da media vuelta;
+  izquierda90();
+  delay(250);
+  izquierda90();
+  //avanza hasta la puerta
+  for(int i=0; i<cont; i++)
+  {
+     adelantetiempo();
+  }
+  delay(250);
+  izquierda90();
+  delay(250);
+  //le pega a la pared
+  adelantetiempo();
+
+  derecha90();
+  delay(250)
+  distancia=SensorFrontal();
+  //avanza hasta la salida
+  while(distancia>5)
+  {
+    avanzar();
+    distancia=SensorFrontal();
+  }
+
+  izquierda90();
+  adelantetiempo();
+  izquierda90();
+
+  //avanza hasta la victoria!
+    while(distancia>5)
+  {
+    avanzar();
+    distancia=SensorFrontal();
+  }
+   
+}
