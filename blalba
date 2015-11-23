@@ -1,0 +1,443 @@
+byte DerechaAdelante = 3; 
+byte DerechaAtras = 2; 
+byte IzquierdaAdelante = 5; 
+byte IzquierdaAtras = 4;  
+const int s0 = 51;  
+const int s1 = 49;  
+const int s2 = 50;  
+const int s3 = 48;  
+const int out = 52;   
+byte SenDerTrig = 40;  //sensor ultrasonico derecha trigger
+byte SenDerEch = 41;//sensor ultrasonico derecha echo
+byte SenEnfEch = 39; //sensor ultrasonico frontal echo
+byte SenEnfTrig = 38; //sensor ultrasonico frontal trigger
+
+byte VelIzquierda = (255); 
+byte VelDerecha = (217) ; 
+int red = 0;  
+int green = 0;  
+int blue = 0;  
+String colon = "";
+long tiempo; // Variable para los ultrasonicos
+long DistanciaSenEnfrente, DistanciaSenDerecha, DistanciaSenIzquierdo;//Variable para la distancia
+
+void setup() 
+{ 
+  pinMode(DerechaAdelante, OUTPUT); 
+  pinMode(DerechaAtras, OUTPUT); 
+  pinMode(IzquierdaAdelante, OUTPUT); 
+  pinMode(IzquierdaAtras, OUTPUT);
+  pinMode(s0, OUTPUT);  
+  pinMode(s1, OUTPUT);  
+  pinMode(s2, OUTPUT);  
+  pinMode(s3, OUTPUT);  
+  pinMode(out, INPUT);   
+  digitalWrite(s0, HIGH);  
+  digitalWrite(s1, HIGH);
+  pinMode(SenDerEch, INPUT);  
+  pinMode(SenDerTrig, OUTPUT);
+  pinModeSenDerEch(, INPUT);  
+  pinMode(SenDerTrig, OUTPUT);
+} 
+
+void adelante() 
+{ 
+  analogWrite(DerechaAdelante, VelDerecha);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, VelIzquierda);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+} 
+void detenerse() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+  delay(75); 
+  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, VelDerecha);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, VelIzquierda);  
+
+  delay(75); 
+
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+} 
+void pararVuelta()
+{
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+}
+void derecha() 
+{  
+  analogWrite(DerechaAdelante, VelDerecha);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+} 
+void izquierda() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, VelIzquierda);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+}
+String color()  
+{    
+  digitalWrite(s2, LOW);  
+  digitalWrite(s3, LOW);  
+  //count OUT, pRed, RED  
+  red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);  
+  digitalWrite(s3, HIGH);  
+  //count OUT, pBLUE, BLUE  
+  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);  
+  digitalWrite(s2, HIGH);  
+  //count OUT, pGreen, GREEN  
+  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH); 
+   
+  if ((green >= 3 && green <= 15) && (blue >= 3 && blue <= 15) && (red >= 3 &&  red <= 15))
+  {
+    colon = "white";
+  }
+  else if ((green > 25 && green < 32) && (blue > 25 && blue < 32) && (red > 45 &&  red < 62))
+  {
+    colon = "green";
+  }
+  else if ((green > 55 && green < 72) && (blue > 40 && blue < 52) && (red > 70 &&  red < 85))
+  {
+    colon = "black";
+  }
+  else if ((green > 25 && green < 36) && (blue > 18 && blue < 27) && (red > 8 &&  red < 15))
+  {
+    colon = "red";
+  }
+}
+
+int SensorFrontal() //funcion para sensor ultrasonico frontal
+{
+ long SumaDistancias = 0;
+ long Distancia1 = 0;
+ long  Distancia2 = 0;
+ long Distancia3 = 0;
+ int iI;
+ 
+  for (iI=1; iI<=3; iI++)
+  {
+    digitalWrite(SenEnfTrig, LOW);
+    delayMicroseconds(5);
+    digitalWrite(SenEnfTrig, HIGH);  
+    delayMicroseconds(10);
+    tiempo=pulseIn(SenEnfEch, HIGH);
+    delayMicroseconds(50);
+    if ( iI==1 )
+    {
+      Distancia1 = int(0.017*tiempo);
+    }
+    else if ( iI== 2 )
+    {
+      Distancia2 = int(0.017*tiempo);
+    }
+    else if ( iI==3 )
+    {
+      Distancia3 = int(0.017*tiempo);
+    }
+   }
+
+  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
+  {
+    if (Distancia2 > Distancia3)
+    {
+      DistanciaSenEnfrente = Distancia2;
+    }
+    else
+    {
+      DistanciaSenEnfrente = Distancia3;
+    }
+  }
+  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
+  {
+    if (Distancia1 > Distancia3)
+    {
+      DistanciaSenEnfrente = Distancia1;
+    }
+    else
+    {
+      DistanciaSenEnfrente = Distancia3;
+    }
+  }
+  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
+  {
+    if (Distancia2 > Distancia1)
+    {
+      DistanciaSenEnfrente = Distancia2;
+    }
+    else 
+    {
+      DistanciaSenEnfrente = Distancia1;
+    }
+  }
+  if (Distancia1 == Distancia2)
+  {
+   DistanciaSenEnfrente=Distancia1;
+  }
+  if (Distancia1 == Distancia3)
+  {
+   DistanciaSenEnfrente=Distancia1;
+  }
+  if (Distancia2 == Distancia3)
+  {
+   DistanciaSenEnfrente=Distancia2;
+  }
+    if (Distancia2 == Distancia1)
+  {
+   DistanciaSenEnfrente=Distancia2;
+  }
+ return DistanciaSenEnfrente;
+}
+
+int SensorDerecha () //funcion para sensor ultrasonico derecha
+{
+  long SumaDistancias = 0;
+ long Distancia1 = 0;
+ long  Distancia2 = 0;
+ long Distancia3 = 0;
+ int iI;
+ 
+  for (iI=1; iI<=3; iI++)
+  {
+    digitalWrite(SenDerTrig, LOW);
+    delayMicroseconds(5);
+    digitalWrite(SenDerTrig, HIGH);  
+    delayMicroseconds(10);
+    tiempo=pulseIn(SenDerEch, HIGH);
+    delayMicroseconds(50);
+    if ( iI==1 )
+    {
+      Distancia1 = int(0.017*tiempo);
+    }
+    else if ( iI== 2 )
+    {
+      Distancia2 = int(0.017*tiempo);
+    }
+    else if ( iI==3 )
+    {
+      Distancia3 = int(0.017*tiempo);
+    }
+   }
+
+  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
+  {
+    if (Distancia2 > Distancia3)
+    {
+      DistanciaSenDerecha = Distancia2;
+    }
+    else
+    {
+      DistanciaSenDerecha = Distancia3;
+    }
+  }
+  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
+  {
+    if (Distancia1 > Distancia3)
+    {
+      DistanciaSenDerecha = Distancia1;
+    }
+    else
+    {
+      DistanciaSenDerecha = Distancia3;
+    }
+  }
+  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
+  {
+    if (Distancia2 > Distancia1)
+    {
+      DistanciaSenDerecha = Distancia2;
+    }  
+    else 
+    {
+      DistanciaSenDerecha = Distancia1;
+    }
+  }
+  if (Distancia1 == Distancia2)
+  {
+   DistanciaSenDerecha=Distancia1;
+  }
+  if (Distancia1 == Distancia3)
+  {
+   DistanciaSenDerecha=Distancia1;
+  }
+  if (Distancia2 == Distancia3)
+  {
+   DistanciaSenDerecha=Distancia2;
+  }
+    if (Distancia2 == Distancia1)
+  {
+   DistanciaSenDerecha=Distancia2;
+  }
+
+  return DistanciaSenDerecha;
+}
+
+void FinDer()
+{
+  adelantetiempo();
+  detenerse();
+  delay(10);
+  String sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+  }
+  else 
+  {
+    derecha90();
+  }
+  pararVuelta();
+  delay(10);
+}
+
+void FinIzq()
+{
+  String sColor = color();
+  if(sColor == "green")
+  {
+    derecha270();
+  }
+  else
+  {
+    izquierda90();
+  }
+  pararVuelta();
+  delay(10);
+}
+
+void Empieza()
+{
+  int iDistancia = SensorFrontal();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    adelante();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    sColor = color();
+    iDistancia == SensorFrontal();
+  }
+  pararVuelta();
+  delay(10);
+  sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+  }
+  else 
+  {
+    derecha90();
+  }
+  pararVuelta();
+  delay(10);
+}
+
+void continua()
+{
+  int iDistancia = SensorFrontal();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    sColor = color();
+    avanzar();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    iDistancia == SensorFrontal();
+    sColor = color();
+  }
+  pararVuelta();
+  delay(10);
+  sColor = color();
+  if(sColor == "green")
+  {
+    derecha270();
+  }
+  else
+  {
+    izquierda90();
+  }
+  pararVuelta();
+  delay(10);
+  adelantetiempo();
+  detenerse();
+  delay(10);
+}
+
+void regreso()
+{
+  String sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+    pararVuelta();
+    delay(10);
+  }
+  else
+  {
+    derecha90();
+    pararVuelta();
+    delay(10);
+  }
+  sColor = color();
+  while (sColor != "plateado")
+  {
+    avanzar();
+    sColor = color();
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+  }
+  detenerse();
+  delay(10);
+}
+void SecUno()
+{
+  Empieza();
+  FinDer();
+  continua();
+  FinIzq();
+  Empieza();
+  FinDer();
+  continua();
+  regreso();
+}
+
+void loop() 
+{ 
+  delay(5000); 
+}
