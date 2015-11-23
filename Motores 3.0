@@ -1,0 +1,68 @@
+byte DerechaAdelante = 3; 
+byte DerechaAtras = 2; 
+byte IzquierdaAdelante = 5; 
+byte IzquierdaAtras = 4;  
+
+byte VelIzquierda = (255); 
+byte VelDerecha = (217) ; 
+
+void setup() 
+{ 
+  pinMode(DerechaAdelante, OUTPUT); 
+  pinMode(DerechaAtras, OUTPUT); 
+  pinMode(IzquierdaAdelante, OUTPUT); 
+  pinMode(IzquierdaAtras, OUTPUT);
+} 
+
+void adelante() 
+{ 
+  analogWrite(DerechaAdelante, VelDerecha);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, VelIzquierda);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+} 
+void detenerse() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+  delay(75); 
+  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, VelDerecha);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, VelIzquierda);  
+
+  delay(75); 
+
+  nalogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+} 
+void derecha() 
+{  
+  analogWrite(DerechaAdelante, VelDerecha);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+} 
+void izquierda() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, VelIzquierda);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+}
+void loop() 
+{ 
+
+  delay(5000); 
+  adelante(); 
+
+}
