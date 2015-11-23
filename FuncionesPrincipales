@@ -9,7 +9,7 @@ byte Aa = 4; //motor adelante derecha
 byte Ab = 5; //motor adelante derecha
 byte Ba = 2; //motor atras derecha
 byte Bb = 3; //motor atras derecha
-byte Ca = 6; //motor adelante izq
+byte Ca = 6; //motor adelante izq 
 byte Cb = 7; //motor adelante izq 
 byte Da = 8; //motor atras izq
 byte Db = 9; //motor atras izq  
@@ -37,6 +37,9 @@ int blue = 0;
 String colon = "";
 long tiempo; // Variable para los ultrasonicos
 long DistanciaSenEnfrente, DistanciaSenDerecha, DistanciaSenIzquierdo;//Variable para la distancia
+int LedR = 10;
+int LedG = 9;
+int LedB = 8;
 
 void setup() {
   Serial.begin (9600);
@@ -59,9 +62,14 @@ void setup() {
   pinMode(SenIzqTrig, OUTPUT);
   pinMode(SenDerTrig, OUTPUT);
   pinMode(SenEnfTrig, OUTPUT);
+  pinMode(LedR, OUTPUT);
+  pinMode(LedG, OUTPUT);
+  pinMode(LedB, OUTPUT);
   digitalWrite(s0, HIGH);  
   digitalWrite(s1, HIGH);
-
+  digitalWrite(LedR, LOW);
+  digitalWrite(LedG, LOW);
+  digitalWrite(LedB, LOW);
  // Tampoco lo entendemos
    if(!mag.begin())
   {
@@ -105,7 +113,7 @@ int heading()
   {
     headingDegrees=map(headingDegrees,290,359,271,359); 
   }
-  delay(5);
+  //delay(5);
   return headingDegrees;
 } 
 
@@ -131,9 +139,62 @@ void avanzar(){
   analogWrite (Db, LOW);
 }
 
+// Motores avanzan 
+
+void avanzar30 ()
+{
+  byte Astop = 150;
+  
+  analogWrite (Aa, Avel);
+  analogWrite (Ab, LOW);
+  
+  analogWrite (Ba, Bvel);
+  analogWrite (Bb, LOW);
+  
+  analogWrite (Ca, Cvel);
+  analogWrite (Cb, LOW); 
+  
+  analogWrite (Da, Dvel);
+  analogWrite (Db, LOW);
+  delay (240);
+  
+  for (int iI=1; Astop > iI; Astop --)
+  {
+    analogWrite (Aa, Astop);
+    analogWrite (Ab, LOW);
+    
+    analogWrite (Ba, Astop);
+    analogWrite (Bb, LOW);
+    
+    analogWrite (Ca, Astop);
+    analogWrite (Cb, LOW); 
+    
+    analogWrite (Da, Astop);
+    analogWrite (Db, LOW);
+    
+    delayMicroseconds(347);
+  }
+  detenerse();
+}
+
 // Motores de detienen 
 
 void detenerse(){ 
+  
+  analogWrite (Aa, LOW);
+  analogWrite (Ab, LOW);
+  
+  analogWrite (Ba, LOW);
+  analogWrite (Bb, LOW);
+  
+  analogWrite (Ca, LOW);
+  analogWrite (Cb, LOW); 
+  
+  analogWrite (Da, LOW);
+  analogWrite (Db, LOW); 
+
+  delay(125); // ABSr
+
   
   analogWrite (Aa, LOW);
   analogWrite (Ab, Avel);
@@ -145,9 +206,9 @@ void detenerse(){
   analogWrite (Cb, Cvel); 
   
   analogWrite (Da, LOW);
-  analogWrite (Db, Dvel);  
+  analogWrite (Db, Dvel);   
 
-  delay(100); // ABS
+  delay(125);
 
   analogWrite (Aa, LOW);
   analogWrite (Ab, LOW);
@@ -160,7 +221,52 @@ void detenerse(){
   
   analogWrite (Da, LOW);
   analogWrite (Db, LOW);
-} 
+}
+
+void PararCurva()
+{
+  analogWrite (Aa, LOW);
+  analogWrite (Ab, LOW);
+  
+  analogWrite (Ba, LOW);
+  analogWrite (Bb, LOW);
+  
+  analogWrite (Ca, LOW);
+  analogWrite (Cb, LOW); 
+  
+  analogWrite (Da, LOW);
+  analogWrite (Db, LOW);
+}
+
+void detenerse2rd(){ 
+  analogWrite (Aa, LOW);
+  analogWrite (Ab, Avel);
+  
+  analogWrite (Ba, LOW);
+  analogWrite (Bb, Bvel);
+  
+  analogWrite (Ca, LOW);
+  analogWrite (Cb, Cvel); 
+  
+  analogWrite (Da, LOW);
+  analogWrite (Db, Dvel);
+
+  delay (1);
+  //ABS
+  
+  analogWrite (Aa, LOW);
+  analogWrite (Ab, LOW);
+  
+  analogWrite (Ba, LOW);
+  analogWrite (Bb, LOW);
+  
+  analogWrite (Ca, LOW);
+  analogWrite (Cb, LOW); 
+  
+  analogWrite (Da, LOW);
+  analogWrite (Db, LOW);
+}  
+
 
 //Motores a la izquierda
 
@@ -182,12 +288,12 @@ void vueltaIzquierda()
 void vueltaDerecha()
 { 
   analogWrite (Aa, LOW);  //LOW
-  analogWrite (Ab, Avel/2); //HIGH
+  analogWrite (Ab, 110); //HIGH
   analogWrite (Ba, LOW);  //LOW
-  analogWrite (Bb, Bvel/2); //HIGH
-  analogWrite (Ca, Cvel/2); //HIGH
+  analogWrite (Bb, 110); //HIGH
+  analogWrite (Ca, 110); //HIGH
   analogWrite (Cb, LOW);  //LOW
-  analogWrite (Da, Dvel/2); //HIGH
+  analogWrite (Da, 110); //HIGH
   analogWrite (Db, LOW);  //LOW
 }
 
@@ -217,7 +323,7 @@ void derecha90()
       g1=heading();
     }
   }
-  detenerse();
+  PararCurva();
 }
 
  
@@ -323,21 +429,40 @@ String color()
   //count OUT, pGreen, GREEN  
   green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH); 
 
-   if ((green >= 3 && green <= 15) && (blue >= 3 && blue <= 15) && (red >= 3 &&  red <= 15))
+  /*Serial.println("red: ");
+  Serial.println(red);
+  Serial.println("green: ");
+  Serial.println(green);
+  Serial.println("blue: ");
+  Serial.println(blue);*/
+  
+   if ((green >= 19 && green <= 25) && (blue >= 15 && blue <= 19) && (red >= 22 &&  red <= 27))
   {
     colon = "white";
+  
+      digitalWrite(LedR, LOW);
+  digitalWrite(LedG, LOW);
+  digitalWrite(LedB, LOW);
   }
-  else if ((green > 25 && green < 32) && (blue > 25 && blue < 32) && (red > 45 &&  red < 62))
+  else if ((green > 82 && green < 95) && (blue > 70 && blue < 84) && (red > 145 &&  red < 172))
   {
+      digitalWrite(LedR, LOW);
+  digitalWrite(LedG, LOW);
+  digitalWrite(LedB, LOW);
     colon = "green";
+    digitalWrite(LedG, HIGH);
   }
-  else if ((green > 55 && green < 72) && (blue > 40 && blue < 52) && (red > 70 &&  red < 85))
+  else if ((green > 155 && green < 162) && (blue > 100 && blue < 112) && (red > 190 &&  red < 200))
   {
     colon = "black";
   }
-  else if ((green > 25 && green < 36) && (blue > 18 && blue < 27) && (red > 8 &&  red < 15))
+  else if ((green > 85 && green < 99) && (blue > 63 && blue < 72) && (red > 36 &&  red < 42))
   {
+      digitalWrite(LedR, LOW);
+  digitalWrite(LedG, LOW);
+  digitalWrite(LedB, LOW);
     colon = "red";
+     digitalWrite(LedR, HIGH);
   }
   return colon;
 }
@@ -528,67 +653,8 @@ int SensorIzquierdo () //funcion para sensor izquierdo
     {
       Distancia1 = int(0.017*tiempo);
     }
-    else if ( iI== 2 )
-    {
-      Distancia2 = int(0.017*tiempo);
-    }
-    else if ( iI==3 )
-    {
-      Distancia3 = int(0.017*tiempo);
-    }
-   }
-
-  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
-  {
-    if (Distancia2 > Distancia3)
-    {
-      DistanciaSenIzquierdo = Distancia2;
-    }
-    else
-    {
-      DistanciaSenIzquierdo = Distancia3;
-    }
-  }
-  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
-  {
-    if (Distancia1 > Distancia3)
-    {
-      DistanciaSenIzquierdo = Distancia1;
-    }
-    else
-    {
-      DistanciaSenIzquierdo = Distancia3;
-    }
-  }
-  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
-  {
-    if (Distancia2 > Distancia1)
-    {
-      DistanciaSenIzquierdo = Distancia2;
-    }
-    else 
-    {
-      DistanciaSenIzquierdo = Distancia1;
-    }
-  }
-  if (Distancia1 == Distancia2)
-  {
-   DistanciaSenIzquierdo=Distancia1;
-  }
-  if (Distancia1 == Distancia3)
-  {
-   DistanciaSenIzquierdo=Distancia1;
-  }
-  if (Distancia2 == Distancia3)
-  {
-   DistanciaSenIzquierdo=Distancia2;
-  }
-    if (Distancia2 == Distancia1)
-  {
-   DistanciaSenIzquierdo=Distancia2;
-  }
-  
  return DistanciaSenIzquierdo;
+}
 }
 
 void adelante30()
@@ -596,33 +662,200 @@ void adelante30()
   int iPos = SensorFrontal();
   int iDist = iPos - 30;
 
+  Serial.println("iPos: ");
+  Serial.println(iPos);
+  Serial.println("iDist: ");
+  Serial.println(iDist);
 
   while(iPos > iDist)
   {
     avanzar();
+   Serial.println("iPos: ");
+  Serial.println(iPos);
+  Serial.println("iDist: ");
+  Serial.println(iDist);
     iPos = SensorFrontal();
   }
   detenerse();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
+void adelantetiempo()
+{
+  avanzar();
+  delay(26);
+  analogWrite (Aa, LOW);
+  analogWrite (Ab, LOW);
+  
+  analogWrite (Ba, LOW);
+  analogWrite (Bb, LOW);
+  
+  analogWrite (Ca, LOW);
+  analogWrite (Cb, LOW); 
+  
+  analogWrite (Da, LOW);
+  analogWrite (Db, LOW);
+  delay(26);
+  detenerse();
 }
 
-// Esta funcion mandara un TRUE si el sensor detecta un pared y False si es que no encuentra
-//Para que funciones solo debes mandar a llamar la funcion ChecarPared y dentro de ella el sensor que se va a medir, por ejemplo ChecarPared(SensorIzquierdo())
-//Se puede cambiar los valores de para detectar si ahi pared o no
-bool ChecarPared(int sensor)
+void FinDer()
 {
-  bool Pared;
-  if (sensor > 3.0 && sensor < 7.5 )// Aqui solo cambias la distancia
+  adelantetiempo();
+  detenerse();
+  delay(10);
+  String sColor = color();
+  if (sColor == "red")
   {
-    bool Pared = HIGH; // Aqui marca que si ahi pared
+    izquierda270();
   }
-  else if (sensor >=7.5)
+  else 
   {
-    bool Pared= Low; // Aqui no ahi pared
+    derecha90();
   }
+  detenerse();
+  delay(10);
+}
 
+void FinIzq()
+{
+  String sColor = color();
+  if(sColor == "green")
+  {
+    derecha270();
+  }
+  else
+  {
+    izquierda90();
+  }
+  detenerse();
+  delay(10);
+}
+
+void Empieza()
+{
+  int iDistancia = SensorFrontal();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    avanzar();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    sColor = color();
+    iDistancia == SensorFrontal();
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+  }
+  else 
+  {
+    derecha90();
+  }
+  detenerse();
+  delay(10);
+}
+
+void continua()
+{
+  int iDistancia = SensorFrontal();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    sColor = color();
+    avanzar();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    iDistancia == SensorFrontal();
+    sColor = color();
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  if(sColor == "green")
+  {
+    derecha270();
+  }
+  else
+  {
+    izquierda90();
+  }
+  detenerse();
+  delay(10);
+  adelantetiempo();
+  detenerse();
+  delay(10);
+}
+
+void regreso()
+{
+  String sColor = color();
+  if (sColor == "red")
+  {
+    izquierda270();
+    detenerse();
+    delay(10);
+  }
+  else
+  {
+    derecha90();
+    detenerse();
+    delay(10);
+  }
+  sColor = color();
+  while (sColor != "plateado")
+  {
+    avanzar();
+    sColor = color();
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+  }
+  detenerse();
+  delay(10);
+}
+
+
+void SecUno()
+{
+    Empieza();
+    FinDer();
+    continua();
+    FinIzq();
+    Empieza();
+    FinDer();
+    continua();
+    regreso();
+}
+void adelantetiempo2()
+{
+  avanzar();
+  delay(450);
+  detenerse();
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  color();
 }
