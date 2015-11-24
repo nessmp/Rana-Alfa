@@ -1,306 +1,536 @@
-#include <math.h>
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_HMC5883_U.h>
-
-Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345); 
-
-byte Aa = 4; //motor adelante derecha
-byte Ab = 5; //motor adelante derecha
-byte Ba = 2; //motor atras derecha
-byte Bb = 3; //motor atras derecha
-byte Ca = 6; //motor adelante izq 
-byte Cb = 7; //motor adelante izq 
-byte Da = 8; //motor atras izq
-byte Db = 9; //motor atras izq  
+//Color
 const int s0 = 51;  
-const int s1 = 49;  
+const int s1 = 53;  
 const int s2 = 50;  
-const int s3 = 48;  
-const int out = 52;  
-byte SenIzqTrig = 43; //sensor ultrasonico izquierdo trigger
-byte SenIzqEch = 42; //sensor ultrasonico izquierdo echo
-byte SenDerTrig = 45;  //sensor ultrasonico derecha trigger
-byte SenDerEch = 44;//sensor ultrasonico derecha echo
-byte SenEnfEch = 46; //sensor ultrasonico frontal echo
-byte SenEnfTrig = 47; //sensor ultrasonico frontal trigger
+const int s3 = 52;  
+const int out = 48;   
+int LedR = 11;
+int LedG = 12;
+int LedB = 49;
 
-
-
-int Avel = 255; // Adelante, derrecha.
-int Bvel = 255; // Atras, derecha.
-int Cvel = 238; // Adelante, izquerda.   (Siempre hay que disminuir en 17 los motores izquierdos.)
-int Dvel = 238; // Atras, izquierda.
 int red = 0;  
 int green = 0;  
 int blue = 0;  
 String colon = "";
-long tiempo; // Variable para los ultrasonicos
-long DistanciaSenEnfrente, DistanciaSenDerecha, DistanciaSenIzquierdo;//Variable para la distancia
-int LedR = 10;
-int LedG = 9;
-int LedB = 8;
 
-void setup() {
-  Serial.begin (9600);
-  pinMode (Aa, OUTPUT);
-  pinMode (Ab, OUTPUT);
-  pinMode (Ba, OUTPUT);
-  pinMode (Bb, OUTPUT);
-  pinMode (Ca, OUTPUT);
-  pinMode (Cb, OUTPUT);
-  pinMode (Da, OUTPUT);
-  pinMode (Db, OUTPUT); 
+//MPU
+int heading;
+
+//Motores
+byte DerechaAdelante = 5; 
+byte DerechaAtras = 10; 
+byte IzquierdaAdelante = 3; 
+byte IzquierdaAtras = 4;  
+
+//Velocidad
+byte VelIzquierda = (255); 
+byte VelDerecha = (225) ; 
+
+//Ultrasonicos
+long distancia1;
+long tiempo1;  
+long distancia2;
+long tiempo2;   
+
+
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#include "Wire.h"
+#endif
+
+MPU6050 mpu;
+
+#define OUTPUT_READABLE_YAWPITCHROLL
+#define LED_PIN 13 
+bool blinkState = false;
+bool dmpReady = false;  
+uint8_t mpuIntStatus;   
+uint8_t devStatus;      
+uint16_t packetSize;    
+uint16_t fifoCount;    
+uint8_t fifoBuffer[64]; 
+
+
+Quaternion q;           
+VectorInt16 aa;         
+VectorInt16 aaReal;     
+VectorInt16 aaWorld;    
+VectorFloat gravity;    
+float euler[3];         
+float ypr[3];          
+
+uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
+
+volatile bool mpuInterrupt = false;     
+void dmpDataReady() 
+{
+   mpuInterrupt = true;
+}
+
+void setup(){ 
+  
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+        Wire.begin();
+        TWBR = 24;
+    #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+        Fastwire::setup(400, true);
+    #endif
+
+    
+    Serial.begin(115200);
+    while (!Serial); 
+
+    mpu.initialize();
+    devStatus = mpu.dmpInitialize();
+
+    // supply your own gyrço offsets here, scaled for min sensitivity
+    mpu.setXGyroOffset(-40);
+    mpu.setYGyroOffset(-163);
+    mpu.setZGyroOffset(39);
+    mpu.setXAccelOffset(-76);
+    mpu.setYAccelOffset(-2359);
+    mpu.setZAccelOffset(1688); // 1688 factory default for my test chip
+
+   
+    if (devStatus == 0) {
+        // turn on the DMP, now that it's ready
+        mpu.setDMPEnabled(true);
+
+        // enable Arduino interrupt detection
+        attachInterrupt(0, dmpDataReady, RISING);
+        mpuIntStatus = mpu.getIntStatus();
+        
+        dmpReady = true;
+
+        // get expected DMP packet size for later comparison
+        packetSize = mpu.dmpGetFIFOPacketSize();
+    } else {
+        
+        Serial.print(F("DMP Initialization failed (code "));
+        Serial.print(devStatus);
+        Serial.println(F(")"));
+    }
+
+    // configure LED for output
+    pinMode(LED_PIN, OUTPUT); 
+
+  //Motores
+  pinMode(DerechaAdelante, OUTPUT); 
+  pinMode(DerechaAtras, OUTPUT); 
+  pinMode(IzquierdaAdelante, OUTPUT); 
+  pinMode(IzquierdaAtras, OUTPUT);
+  
+  //Ultrasonicos
+  pinMode(9, OUTPUT); /*activación del pin 9 como salida: para el pulso ultrasónico*/
+  pinMode(8, INPUT); /*activación del pin 8 como entrada: tiempo del rebote del ultrasonido*/ 
+  pinMode(7, OUTPUT); 
+  pinMode(6, INPUT); 
+
+  //Color
   pinMode(s0, OUTPUT);  
   pinMode(s1, OUTPUT);  
   pinMode(s2, OUTPUT);  
   pinMode(s3, OUTPUT);  
-  pinMode(out, INPUT);  
-  pinMode(SenIzqEch, INPUT);
-  pinMode(SenDerEch, INPUT);
-  pinMode(SenEnfEch, INPUT);
-  pinMode(SenIzqTrig, OUTPUT);
-  pinMode(SenDerTrig, OUTPUT);
-  pinMode(SenEnfTrig, OUTPUT);
+  pinMode(out, INPUT);   
   pinMode(LedR, OUTPUT);
   pinMode(LedG, OUTPUT);
   pinMode(LedB, OUTPUT);
   digitalWrite(s0, HIGH);  
-  digitalWrite(s1, HIGH);
-  digitalWrite(LedR, LOW);
-  digitalWrite(LedG, LOW);
-  digitalWrite(LedB, LOW);
- // Tampoco lo entendemos
-   if(!mag.begin())
+  digitalWrite(s1, HIGH);  
+  
+  //Estabilizador del MPU
+  for(int i=0; i<10; i++)
   {
-    Serial.println("Ooops, no HMC5883 detected ... Check your wiring!");
-    while(1);
+  MPUestabilizar(); 
   } 
+  
+}
 
- //Pero funciona
+  void MPUestabilizar() {
+   
+    while (!mpuInterrupt && fifoCount < packetSize) {
+        
+    }
+
+    
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
+
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
+
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+        // reset so we can continue cleanly
+        mpu.resetFIFO();
+        Serial.println(F("FIFO overflow!"));
+
+    // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } else if (mpuIntStatus & 0x02) {
+        // wait for correct available data length, should be a VERY short wait
+        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+        // read a packet from FIFO
+        mpu.getFIFOBytes(fifoBuffer, packetSize);
+        
+       
+        fifoCount -= packetSize;
+
+        #ifdef OUTPUT_READABLE_QUATERNION
+            // display quaternion values in easy matrix form: w x y z
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            Serial.print("quat\t");
+            Serial.print(q.w);
+            Serial.print("\t");
+            Serial.print(q.x);
+            Serial.print("\t");
+            Serial.print(q.y);
+            Serial.print("\t");
+            Serial.println(q.z);
+        #endif
+
+        #ifdef OUTPUT_READABLE_EULER
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetEuler(euler, &q);
+            Serial.print("euler\t");
+            Serial.print(euler[0] * 180/M_PI);
+            Serial.print("\t");
+            Serial.print(euler[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(euler[2] * 180/M_PI);
+        #endif
+
+        #ifdef OUTPUT_READABLE_YAWPITCHROLL
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            Serial.print("ypr\t");
+            Serial.print(ypr[0] * 180/M_PI); //Valor de la vuelta
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);
+            heading=(ypr[0] * 180/M_PI);
+            if(heading<0)
+            {
+              heading=map(heading,-179,-1, 180, 359);
+            }
+            Serial.println(heading);
+        #endif
+
+        #ifdef OUTPUT_READABLE_REALACCEL
+            // display real acceleration, adjusted to remove gravity
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            Serial.print("areal\t");
+            Serial.print(aaReal.x);
+            Serial.print("\t");
+            Serial.print(aaReal.y);
+            Serial.print("\t");
+            Serial.println(aaReal.z);
+        #endif
+
+        #ifdef OUTPUT_READABLE_WORLDACCEL
+            
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+            Serial.print("aworld\t");
+            Serial.print(aaWorld.x);
+            Serial.print("\t");
+            Serial.print(aaWorld.y);
+            Serial.print("\t");
+            Serial.println(aaWorld.z);
+        #endif
+    
+        #ifdef OUTPUT_TEAPOT
+            // display quaternion values in InvenSense Teapot demo format:
+            teapotPacket[2] = fifoBuffer[0];
+            teapotPacket[3] = fifoBuffer[1];
+            teapotPacket[4] = fifoBuffer[4];
+            teapotPacket[5] = fifoBuffer[5];
+            teapotPacket[6] = fifoBuffer[8];
+            teapotPacket[7] = fifoBuffer[9];
+            teapotPacket[8] = fifoBuffer[12];
+            teapotPacket[9] = fifoBuffer[13];
+            Serial.write(teapotPacket, 14);
+            teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
+        #endif
+
+        // blink LED to indicate activity
+        blinkState = !blinkState;
+        digitalWrite(LED_PIN, blinkState);
+    } 
+    delay(2000);
+
 } 
 
-//Magnetometro, (no lo entendemos pero funciona) 
-//Magnetometro, (no lo entendemos pero funciona) 
-//Magnetometro, (no lo entendemos pero funciona) 
-//Magnetometro, (no lo entendemos pero funciona) 
+int MPU() {
+   
+    while (!mpuInterrupt && fifoCount < packetSize) {
+        
+    }
 
-int heading() 
-{
-  sensors_event_t event; 
-  mag.getEvent(&event);
-  float heading = atan2(event.magnetic.y, event.magnetic.x);
-  float declinationAngle = 0.087;
-  heading += declinationAngle;
-  if(heading < 0)
-    heading += 2*PI;
-  if(heading > 2*PI)
-    heading -= 2*PI;
-  int headingDegrees = heading * 180/M_PI; 
-  if (headingDegrees<=86)
-  {
-    headingDegrees=map(headingDegrees,0,86,0,90); 
-  }
-    if (headingDegrees<=200 && headingDegrees>86)
-  {
-    headingDegrees=map(headingDegrees,87,200,91,180); 
-  }
-     if (headingDegrees<=289 && headingDegrees>200)
-  {
-    headingDegrees=map(headingDegrees,201,289,181,270); 
-  }
-       if (headingDegrees<=359 && headingDegrees>289)
-  {
-    headingDegrees=map(headingDegrees,290,359,271,359); 
-  }
-  //delay(5);
-  return headingDegrees;
+    
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
+
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
+
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+        // reset so we can continue cleanly
+        mpu.resetFIFO();
+        Serial.println(F("FIFO overflow!"));
+
+    // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } else if (mpuIntStatus & 0x02) {
+        // wait for correct available data length, should be a VERY short wait
+        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+        // read a packet from FIFO
+        mpu.getFIFOBytes(fifoBuffer, packetSize);
+        
+       
+        fifoCount -= packetSize;
+
+        #ifdef OUTPUT_READABLE_QUATERNION
+            // display quaternion values in easy matrix form: w x y z
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            Serial.print("quat\t");
+            Serial.print(q.w);
+            Serial.print("\t");
+            Serial.print(q.x);
+            Serial.print("\t");
+            Serial.print(q.y);
+            Serial.print("\t");
+            Serial.println(q.z);
+        #endif
+
+        #ifdef OUTPUT_READABLE_EULER
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetEuler(euler, &q);
+            Serial.print("euler\t");
+            Serial.print(euler[0] * 180/M_PI);
+            Serial.print("\t");
+            Serial.print(euler[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(euler[2] * 180/M_PI);
+        #endif
+
+        #ifdef OUTPUT_READABLE_YAWPITCHROLL
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            Serial.print("ypr\t");
+            Serial.print(ypr[0] * 180/M_PI); //Valor de la vuelta
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);
+            heading=(ypr[0] * 180/M_PI);
+            if(heading<0)
+            {
+              heading=map(heading,-179,-1, 180, 359);
+            }
+            Serial.println(heading);
+            
+        #endif
+
+        #ifdef OUTPUT_READABLE_REALACCEL
+            // display real acceleration, adjusted to remove gravity
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            Serial.print("areal\t");
+            Serial.print(aaReal.x);
+            Serial.print("\t");
+            Serial.print(aaReal.y);
+            Serial.print("\t");
+            Serial.println(aaReal.z);
+        #endif
+
+        #ifdef OUTPUT_READABLE_WORLDACCEL
+            
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+            Serial.print("aworld\t");
+            Serial.print(aaWorld.x);
+            Serial.print("\t");
+            Serial.print(aaWorld.y);
+            Serial.print("\t");
+            Serial.println(aaWorld.z);
+        #endif
+    
+        #ifdef OUTPUT_TEAPOT
+            // display quaternion values in InvenSense Teapot demo format:
+            teapotPacket[2] = fifoBuffer[0];
+            teapotPacket[3] = fifoBuffer[1];
+            teapotPacket[4] = fifoBuffer[4];
+            teapotPacket[5] = fifoBuffer[5];
+            teapotPacket[6] = fifoBuffer[8];
+            teapotPacket[7] = fifoBuffer[9];
+            teapotPacket[8] = fifoBuffer[12];
+            teapotPacket[9] = fifoBuffer[13];
+            Serial.write(teapotPacket, 14);
+            teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
+        #endif
+
+        // blink LED to indicate activity
+        blinkState = !blinkState;
+        digitalWrite(LED_PIN, blinkState);
+    } 
+    return heading;
+   
 } 
 
-// (Despues de esta parte si entendemos) 
-// (Despues de esta parte si entendemos) 
-// (Despues de esta parte si entendemos) 
-// (Despues de esta parte si entendemos)
-
-// Motores avnazan 
-
-void avanzar(){ 
-  
-  analogWrite (Aa, Avel);
-  analogWrite (Ab, LOW);
-  
-  analogWrite (Ba, Bvel);
-  analogWrite (Bb, LOW);
-  
-  analogWrite (Ca, Cvel);
-  analogWrite (Cb, LOW); 
-  
-  analogWrite (Da, Dvel);
-  analogWrite (Db, LOW);
-}
-
-// Motores avanzan 
-
-void avanzar30 ()
-{
-  byte Astop = 150;
-  
-  analogWrite (Aa, Avel);
-  analogWrite (Ab, LOW);
-  
-  analogWrite (Ba, Bvel);
-  analogWrite (Bb, LOW);
-  
-  analogWrite (Ca, Cvel);
-  analogWrite (Cb, LOW); 
-  
-  analogWrite (Da, Dvel);
-  analogWrite (Db, LOW);
-  delay (240);
-  
-  for (int iI=1; Astop > iI; Astop --)
-  {
-    analogWrite (Aa, Astop);
-    analogWrite (Ab, LOW);
-    
-    analogWrite (Ba, Astop);
-    analogWrite (Bb, LOW);
-    
-    analogWrite (Ca, Astop);
-    analogWrite (Cb, LOW); 
-    
-    analogWrite (Da, Astop);
-    analogWrite (Db, LOW);
-    
-    delayMicroseconds(347);
-  }
-  detenerse();
-}
-
-// Motores de detienen 
-
-void detenerse(){ 
-  
-  analogWrite (Aa, LOW);
-  analogWrite (Ab, LOW);
-  
-  analogWrite (Ba, LOW);
-  analogWrite (Bb, LOW);
-  
-  analogWrite (Ca, LOW);
-  analogWrite (Cb, LOW); 
-  
-  analogWrite (Da, LOW);
-  analogWrite (Db, LOW); 
-
-  delay(125); // ABSr
-
-  
-  analogWrite (Aa, LOW);
-  analogWrite (Ab, Avel);
-  
-  analogWrite (Ba, LOW);
-  analogWrite (Bb, Bvel);
-  
-  analogWrite (Ca, LOW);
-  analogWrite (Cb, Cvel); 
-  
-  analogWrite (Da, LOW);
-  analogWrite (Db, Dvel);   
-
-  delay(125);
-
-  analogWrite (Aa, LOW);
-  analogWrite (Ab, LOW);
-  
-  analogWrite (Ba, LOW);
-  analogWrite (Bb, LOW);
-  
-  analogWrite (Ca, LOW);
-  analogWrite (Cb, LOW); 
-  
-  analogWrite (Da, LOW);
-  analogWrite (Db, LOW);
-}
-
-void PararCurva()
-{
-  analogWrite (Aa, LOW);
-  analogWrite (Ab, LOW);
-  
-  analogWrite (Ba, LOW);
-  analogWrite (Bb, LOW);
-  
-  analogWrite (Ca, LOW);
-  analogWrite (Cb, LOW); 
-  
-  analogWrite (Da, LOW);
-  analogWrite (Db, LOW);
-}
-
-void detenerse2rd(){ 
-  analogWrite (Aa, LOW);
-  analogWrite (Ab, Avel);
-  
-  analogWrite (Ba, LOW);
-  analogWrite (Bb, Bvel);
-  
-  analogWrite (Ca, LOW);
-  analogWrite (Cb, Cvel); 
-  
-  analogWrite (Da, LOW);
-  analogWrite (Db, Dvel);
-
-  delay (1);
-  //ABS
-  
-  analogWrite (Aa, LOW);
-  analogWrite (Ab, LOW);
-  
-  analogWrite (Ba, LOW);
-  analogWrite (Bb, LOW);
-  
-  analogWrite (Ca, LOW);
-  analogWrite (Cb, LOW); 
-  
-  analogWrite (Da, LOW);
-  analogWrite (Db, LOW);
-}  
-
-
-//Motores a la izquierda
-
-void vueltaIzquierda() 
+//Sensor derecha
+int ultrasonico1 () 
 { 
-  analogWrite (Aa, 190); //HIGH
-  analogWrite (Ab, LOW);  //LOW
-  analogWrite (Ba, 155); //HIGH
-  analogWrite (Bb, LOW);  //LOW
+  digitalWrite(9,LOW);  
+  //delayMicroseconds(5);
+  //digitalWrite(9, HIGH);   
+  //delayMicroseconds(10);  
+ 
+  tiempo1 = pulseIn(8, HIGH);   
+
+  distancia1= int(0.017*tiempo1);  
   
-  analogWrite (Ca, LOW);  //LOW
-  analogWrite (Cb, 155); //HIGH 
-  analogWrite (Da, LOW);  //LOW
-  analogWrite (Db, 110); //HIGH
+  Serial.println("Distancia ");
+  Serial.println(distancia1);
+  Serial.println(" cm");
+  delay(1); 
+  return distancia1;
+}
+
+//Sensor frontal
+int ultrasonico2 () 
+{ 
+  digitalWrite(7,LOW);
+  delayMicroseconds(5);
+  digitalWrite(7, HIGH); 
+  delayMicroseconds(10);  
+ 
+  tiempo1 = pulseIn(6, HIGH);   
+
+  distancia1= int(0.017*tiempo1);  
+  
+  Serial.println("Distancia ");
+  Serial.println(distancia1);
+  Serial.println(" cm");
+  return distancia1;
+  delay(1);
 } 
 
-//Motores a la derecha
-
-void vueltaDerecha()
+//Motores movimientos
+void adelante() 
 { 
-  analogWrite (Aa, LOW);  //LOW
-  analogWrite (Ab, 110); //HIGH
-  analogWrite (Ba, LOW);  //LOW
-  analogWrite (Bb, 110); //HIGH
-  analogWrite (Ca, 110); //HIGH
-  analogWrite (Cb, LOW);  //LOW
-  analogWrite (Da, 110); //HIGH
-  analogWrite (Db, LOW);  //LOW
+  analogWrite(DerechaAdelante, VelDerecha);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, VelIzquierda);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+} 
+void adelantelento()
+{
+  analogWrite(DerechaAdelante, VelDerecha/2);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante,(VelIzquierda/2) + 24);  
+  analogWrite(IzquierdaAtras, LOW); 
+}
+void detenerse() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+  delay(75); 
+  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, VelDerecha);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, VelIzquierda);  
+
+  delay(75); 
+
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+} 
+void pararVuelta()
+{
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+}
+void derecha() 
+{  
+  analogWrite(DerechaAdelante, (VelDerecha*.65));  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, (VelIzquierda*.65)); 
+  
+} 
+void izquierda() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, (VelDerecha*.5));  
+  analogWrite(IzquierdaAdelante, (VelIzquierda*.5));  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+}
+
+void izquierda90()
+{
+  int g1=MPU();
+  int g2=g1 - 84;
+  if(g2 < 0)
+  {
+    g2 += 360;
+  }
+  bool cont = false;
+
+  while(cont == false)
+  {
+    if (g1 > g2)
+    {
+      izquierda();
+      g1=MPU();
+      if(g1 <= g2)
+      {
+        cont = true;
+      }
+    }
+    else if(g1 < g2)
+    {
+      izquierda();
+      g1=MPU();
+    }
+  }
+  pararVuelta();
 }
 
 void derecha90()
 {
-  int g1 = heading();
-  int g2 = g1 + 90;
+  int g1 = MPU();
+  int g2 = g1 + 84;
   if(g2 > 360)
   {
     g2 -= 360;
@@ -308,10 +538,10 @@ void derecha90()
   bool cont = false;
   while (cont == false)
   {
-    if(g1 <= g2)
+    if(g1 < g2)
     {
-      vueltaDerecha();
-      g1 = heading();
+      derecha();
+      g1 = MPU();
       if(g1 >= g2)
       {
         cont = true;
@@ -319,105 +549,17 @@ void derecha90()
     }
     else if(g1 > g2)
     {
-      vueltaDerecha();
-      g1=heading();
+      derecha();
+      g1=MPU();
     }
   }
-  PararCurva();
-}
-
- 
-void derecha270()
-{
-  int g1 = heading();
-  int g2 = g1 - 90;
-  if(g2 < 0)
-  {
-    g2 += 360;
-  }
-  bool cont = false;
-  while(cont == false)
-  {
-    if(g1 <= g2)
-    {
-      if(g1 >= g2)
-      {
-        cont = true;
-      }
-      vueltaDerecha();
-      g1 = heading();
-    }
-    else if(g1 > g2)
-    {
-      vueltaDerecha();
-      g1 = heading();
-    }
-  }
-  detenerse();
-}
-
-void izquierda90()
-{
-  int g1=heading();
-  int g2=g1 - 90;
-  if(g2 < 0)
-  {
-    g2 += 360;
-  }
-  bool cont = false;
-
-  while(cont == false)
-  {
-    if (g1 >= g2)
-    {
-      if(g1 <= g2)
-      {
-        cont = true;
-      }
-      vueltaIzquierda();
-      g1 = heading();
-      
-    }
-    else if(g1 < g2)
-    {
-      vueltaIzquierda();
-      g1=heading();
-    }
-  }
-  detenerse();
-}
-
-void izquierda270()
-{
-  int g1 = heading();
-  int g2 = g1 + 90;
-  if (g2 > 360)
-  {
-    g2 -= 360;
-  }
-  bool cont = false;
-  while(cont == false)
-  {
-    if( g1 >= g2)
-    {
-      if(g1 <= g2)
-      {
-        cont = true;
-      }
-      vueltaIzquierda();
-      g1 = heading();
-    }
-    else if(g1 < g2)
-    {
-      vueltaIzquierda();
-      g1 = heading();
-    }
-  }
-  detenerse();
+  pararVuelta();
+  g1=MPU();
 }
 
 String color()  
 {    
+  Serial.println("Entra a color() ");
   digitalWrite(s2, LOW);  
   digitalWrite(s3, LOW);  
   //count OUT, pRed, RED  
@@ -427,435 +569,43 @@ String color()
   blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);  
   digitalWrite(s2, HIGH);  
   //count OUT, pGreen, GREEN  
-  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH); 
+  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
-  /*Serial.println("red: ");
-  Serial.println(red);
-  Serial.println("green: ");
-  Serial.println(green);
-  Serial.println("blue: ");
-  Serial.println(blue);*/
-  
-   if ((green >= 19 && green <= 25) && (blue >= 15 && blue <= 19) && (red >= 22 &&  red <= 27))
+
+   if ((green >= 10 && green <= 30) && (blue >= 3 && blue <= 20) && (red >= 18 &&  red <= 30))
   {
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
     colon = "white";
-  
-      digitalWrite(LedR, LOW);
-  digitalWrite(LedG, LOW);
-  digitalWrite(LedB, LOW);
+    
   }
-  else if ((green > 82 && green < 95) && (blue > 70 && blue < 84) && (red > 145 &&  red < 172))
+  else if ((green > 50 && green < 70) && (blue > 45 && blue < 60) && (red > 85 &&  red < 100))
   {
-      digitalWrite(LedR, LOW);
-  digitalWrite(LedG, LOW);
-  digitalWrite(LedB, LOW);
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
     colon = "green";
     digitalWrite(LedG, HIGH);
   }
-  else if ((green > 155 && green < 162) && (blue > 100 && blue < 112) && (red > 190 &&  red < 200))
+  else if ((green > 80 && green < 110) && (blue > 50 && blue < 70) && (red > 100 &&  red < 120))
   {
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
     colon = "black";
   }
-  else if ((green > 85 && green < 99) && (blue > 63 && blue < 72) && (red > 36 &&  red < 42))
+  else if ((green > 60 && green < 70) && (blue > 38 && blue < 51) && (red > 30 &&  red < 40))
   {
-      digitalWrite(LedR, LOW);
-  digitalWrite(LedG, LOW);
-  digitalWrite(LedB, LOW);
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
     colon = "red";
-     digitalWrite(LedR, HIGH);
+    digitalWrite(LedR, HIGH);
   }
   return colon;
 }
 
-int SensorDerecha () //funcion para sensor ultrasonico derecha
-{
-  long SumaDistancias = 0;
- long Distancia1 = 0;
- long  Distancia2 = 0;
- long Distancia3 = 0;
- int iI;
- 
-  for (iI=1; iI<=3; iI++)
-  {
-    digitalWrite(45, LOW);
-    delayMicroseconds(5);
-    digitalWrite(45, HIGH);  
-    delayMicroseconds(10);
-    tiempo=pulseIn(44, HIGH);
-    delayMicroseconds(50);
-    if ( iI==1 )
-    {
-      Distancia1 = int(0.017*tiempo);
-    }
-    else if ( iI== 2 )
-    {
-      Distancia2 = int(0.017*tiempo);
-    }
-    else if ( iI==3 )
-    {
-      Distancia3 = int(0.017*tiempo);
-    }
-   }
-
-  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
-  {
-    if (Distancia2 > Distancia3)
-    {
-      DistanciaSenDerecha = Distancia2;
-    }
-    else
-    {
-      DistanciaSenDerecha = Distancia3;
-    }
-  }
-  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
-  {
-    if (Distancia1 > Distancia3)
-    {
-      DistanciaSenDerecha = Distancia1;
-    }
-    else
-    {
-      DistanciaSenDerecha = Distancia3;
-    }
-  }
-  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
-  {
-    if (Distancia2 > Distancia1)
-    {
-      DistanciaSenDerecha = Distancia2;
-    }  
-    else 
-    {
-      DistanciaSenDerecha = Distancia1;
-    }
-  }
-  if (Distancia1 == Distancia2)
-  {
-   DistanciaSenDerecha=Distancia1;
-  }
-  if (Distancia1 == Distancia3)
-  {
-   DistanciaSenDerecha=Distancia1;
-  }
-  if (Distancia2 == Distancia3)
-  {
-   DistanciaSenDerecha=Distancia2;
-  }
-    if (Distancia2 == Distancia1)
-  {
-   DistanciaSenDerecha=Distancia2;
-  }
-
-  return DistanciaSenDerecha;
-}
-
-int SensorFrontal() //funcion para sensor ultrasonico frontal
-{
- long SumaDistancias = 0;
- long Distancia1 = 0;
- long  Distancia2 = 0;
- long Distancia3 = 0;
- int iI;
- 
-  for (iI=1; iI<=3; iI++)
-  {
-    digitalWrite(47, LOW);
-    delayMicroseconds(5);
-    digitalWrite(47, HIGH);  
-    delayMicroseconds(10);
-    tiempo=pulseIn(46, HIGH);
-    delayMicroseconds(50);
-    if ( iI==1 )
-    {
-      Distancia1 = int(0.017*tiempo);
-    }
-    else if ( iI== 2 )
-    {
-      Distancia2 = int(0.017*tiempo);
-    }
-    else if ( iI==3 )
-    {
-      Distancia3 = int(0.017*tiempo);
-    }
-   }
-
-  if (Distancia1 > Distancia2 && Distancia1 > Distancia3)
-  {
-    if (Distancia2 > Distancia3)
-    {
-      DistanciaSenEnfrente = Distancia2;
-    }
-    else
-    {
-      DistanciaSenEnfrente = Distancia3;
-    }
-  }
-  if (Distancia2 > Distancia1 && Distancia2 > Distancia3)
-  {
-    if (Distancia1 > Distancia3)
-    {
-      DistanciaSenEnfrente = Distancia1;
-    }
-    else
-    {
-      DistanciaSenEnfrente = Distancia3;
-    }
-  }
-  if (Distancia3 > Distancia1 && Distancia3 > Distancia2)
-  {
-    if (Distancia2 > Distancia1)
-    {
-      DistanciaSenEnfrente = Distancia2;
-    }
-    else 
-    {
-      DistanciaSenEnfrente = Distancia1;
-    }
-  }
-  if (Distancia1 == Distancia2)
-  {
-   DistanciaSenEnfrente=Distancia1;
-  }
-  if (Distancia1 == Distancia3)
-  {
-   DistanciaSenEnfrente=Distancia1;
-  }
-  if (Distancia2 == Distancia3)
-  {
-   DistanciaSenEnfrente=Distancia2;
-  }
-    if (Distancia2 == Distancia1)
-  {
-   DistanciaSenEnfrente=Distancia2;
-  }
- return DistanciaSenEnfrente;
-}
-
-int SensorIzquierdo () //funcion para sensor izquierdo
-{
- long SumaDistancias = 0;
- long Distancia1 = 0;
- long  Distancia2 = 0;
- long Distancia3 = 0;
- long DistanciaSenIzquierdo = 0;
- int iI;
- 
-  for (iI=1; iI<=3; iI++)
-  {
-    digitalWrite(43, LOW);
-    delayMicroseconds(5);
-    digitalWrite(43, HIGH);  
-    delayMicroseconds(10);
-    tiempo=pulseIn(42, HIGH);
-    delayMicroseconds(50);
-    if ( iI==1 )
-    {
-      Distancia1 = int(0.017*tiempo);
-    }
- return DistanciaSenIzquierdo;
-}
-}
-
-void adelante30()
-{
-  int iPos = SensorFrontal();
-  int iDist = iPos - 30;
-
-  Serial.println("iPos: ");
-  Serial.println(iPos);
-  Serial.println("iDist: ");
-  Serial.println(iDist);
-
-  while(iPos > iDist)
-  {
-    avanzar();
-   Serial.println("iPos: ");
-  Serial.println(iPos);
-  Serial.println("iDist: ");
-  Serial.println(iDist);
-    iPos = SensorFrontal();
-  }
-  detenerse();
-}
-
-void adelantetiempo()
-{
-  avanzar();
-  delay(26);
-  analogWrite (Aa, LOW);
-  analogWrite (Ab, LOW);
-  
-  analogWrite (Ba, LOW);
-  analogWrite (Bb, LOW);
-  
-  analogWrite (Ca, LOW);
-  analogWrite (Cb, LOW); 
-  
-  analogWrite (Da, LOW);
-  analogWrite (Db, LOW);
-  delay(26);
-  detenerse();
-}
-
-void FinDer()
-{
-  adelantetiempo();
-  detenerse();
-  delay(10);
-  String sColor = color();
-  if (sColor == "red")
-  {
-    izquierda270();
-  }
-  else 
-  {
-    derecha90();
-  }
-  detenerse();
-  delay(10);
-}
-
-void FinIzq()
-{
-  String sColor = color();
-  if(sColor == "green")
-  {
-    derecha270();
-  }
-  else
-  {
-    izquierda90();
-  }
-  detenerse();
-  delay(10);
-}
-
-void Empieza()
-{
-  int iDistancia = SensorFrontal();
-  String sColor = color();
-  while (iDistancia > 5)
-  {
-    avanzar();
-
-    if (sColor == "red")
-    {
-      digitalWrite(LedR, HIGH);
-    }
-    if (sColor == "green")
-    {
-      digitalWrite(LedG, HIGH);
-    }
-    sColor = color();
-    iDistancia == SensorFrontal();
-  }
-  detenerse();
-  delay(10);
-  sColor = color();
-  if (sColor == "red")
-  {
-    izquierda270();
-  }
-  else 
-  {
-    derecha90();
-  }
-  detenerse();
-  delay(10);
-}
-
-void continua()
-{
-  int iDistancia = SensorFrontal();
-  String sColor = color();
-  while (iDistancia > 5)
-  {
-    sColor = color();
-    avanzar();
-
-    if (sColor == "red")
-    {
-      digitalWrite(LedR, HIGH);
-    }
-    if (sColor == "green")
-    {
-      digitalWrite(LedG, HIGH);
-    }
-    iDistancia == SensorFrontal();
-    sColor = color();
-  }
-  detenerse();
-  delay(10);
-  sColor = color();
-  if(sColor == "green")
-  {
-    derecha270();
-  }
-  else
-  {
-    izquierda90();
-  }
-  detenerse();
-  delay(10);
-  adelantetiempo();
-  detenerse();
-  delay(10);
-}
-
-void regreso()
-{
-  String sColor = color();
-  if (sColor == "red")
-  {
-    izquierda270();
-    detenerse();
-    delay(10);
-  }
-  else
-  {
-    derecha90();
-    detenerse();
-    delay(10);
-  }
-  sColor = color();
-  while (sColor != "plateado")
-  {
-    avanzar();
-    sColor = color();
-    if (sColor == "red")
-    {
-      digitalWrite(LedR, HIGH);
-    }
-    if (sColor == "green")
-    {
-      digitalWrite(LedG, HIGH);
-    }
-  }
-  detenerse();
-  delay(10);
-}
-
-
-void SecUno()
-{
-    Empieza();
-    FinDer();
-    continua();
-    FinIzq();
-    Empieza();
-    FinDer();
-    continua();
-    regreso();
-}
-void adelantetiempo2()
-{
-  avanzar();
-  delay(450);
-  detenerse();
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  color();
+void loop () 
+{ 
 }
