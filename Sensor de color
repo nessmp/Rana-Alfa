@@ -5,7 +5,7 @@ const int s3 = 48;
 const int out = 52;   
 int LedR = 11;
 int LedG = 12;
-int LedB = 13;
+int LedB = 51;
 
 
 // Variables  
