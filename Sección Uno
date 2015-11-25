@@ -1,78 +1,111 @@
+void Empieza()
+{
+  int iDistancia = ultrasonico2();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    adelante();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    sColor = color();
+    iDistancia = ultrasonico2();
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  bool Listo = false;
+  while(Listo == false)
+  {
+     if (sColor == "red")
+     {
+       izquierda90();
+       delay(10);
+       izquierda90();
+       delay(10);
+       izquierda90();
+       delay(10);
+       Listo = true;
+     }
+     else 
+     {
+       derecha90();
+       Listo = true;
+     }
+     pararVuelta();
+     delay(100);
+  }
+}
+
 void FinDer()
 {
-  adelantetiempo();
+  adelante30();
   detenerse();
-  delay(10);
+  delay(100);
   String sColor = color();
-  if (sColor == "red")
+  bool Listo = false;
+  while(Listo == false)
   {
-    izquierda270();
+      if (sColor == "red")
+      {
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        Listo = true;
+      }
+      else 
+      {
+        derecha90();
+        Listo = true;
+      }
+      pararVuelta();
+      delay(100);
   }
-  else 
-  {
-    derecha90();
-  }
-  detenerse();
-  delay(10);
 }
 
 void FinIzq()
 {
   String sColor = color();
-  if(sColor == "green")
+  bool Listo = false;
+  while(Listo == false)
   {
-    derecha270();
-  }
-  else
-  {
-    izquierda90();
-  }
-  detenerse();
-  delay(10);
-}
-
-void Empieza()
-{
-  int iDistancia = SensorFrontal();
-  String sColor = color();
-  while (iDistancia > 5)
-  {
-    avanzar();
-
-    if (sColor == "red")
-    {
-      digitalWrite(LedR, HIGH);
-    }
-    if (sColor == "green")
-    {
-      digitalWrite(LedG, HIGH);
-    }
-    sColor = color();
-    iDistancia == SensorFrontal();
-  }
-  detenerse();
-  delay(10);
-  sColor = color();
-  if (sColor == "red")
-  {
-    izquierda270();
-  }
-  else 
-  {
-    derecha90();
-  }
-  detenerse();
-  delay(10);
+     if(sColor == "green")
+     {
+       derecha90();
+       delay(10);
+       derecha90();
+       delay(10);
+       derecha90();
+       delay(10);
+       Listo == true;
+     }
+     else
+     {
+       izquierda90();
+       delay(10);
+       Listo = true;
+     }
+     detenerse();
+     delay(100);
+   }
 }
 
 void continua()
 {
-  int iDistancia = SensorFrontal();
+  int iDistancia = ultrasonico2();
   String sColor = color();
   while (iDistancia > 5)
   {
-    sColor = color();
-    avanzar();
+    adelante();
 
     if (sColor == "red")
     {
@@ -82,23 +115,35 @@ void continua()
     {
       digitalWrite(LedG, HIGH);
     }
-    iDistancia == SensorFrontal();
+    iDistancia = ultrasonico2();
     sColor = color();
   }
   detenerse();
   delay(10);
   sColor = color();
-  if(sColor == "green")
+  bool Listo = false;
+  while (Listo == false)
   {
-    derecha270();
+      if(sColor == "green")
+      {
+        derecha90();
+        delay(10);
+        derecha90();
+        delay(10);
+        derecha90();
+        delay(10);
+        Listo = true;
+      }
+      else
+      {
+        izquierda90();
+        delay(10);
+        Listo = true;
+      }
   }
-  else
-  {
-    izquierda90();
-  }
-  detenerse();
+  pararVuelta();
   delay(10);
-  adelantetiempo();
+  adelante30();
   detenerse();
   delay(10);
 }
@@ -106,22 +151,34 @@ void continua()
 void regreso()
 {
   String sColor = color();
-  if (sColor == "red")
+  bool Listo = false;
+  while (Listo == false)
   {
-    izquierda270();
-    detenerse();
-    delay(10);
-  }
-  else
-  {
-    derecha90();
-    detenerse();
-    delay(10);
+      if (sColor == "red")
+      {
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        pararVuelta();
+        delay(100);
+        Listo = true;
+      }
+      else
+      {
+        derecha90();
+        pararVuelta();
+        delay(100);
+        Listo = true;
+      }
+      sColor = color();
   }
   sColor = color();
   while (sColor != "plateado")
   {
-    avanzar();
+    adelante();
     sColor = color();
     if (sColor == "red")
     {
@@ -133,7 +190,7 @@ void regreso()
     }
   }
   detenerse();
-  delay(10);
+  delay(100);
 }
 void SecUno()
 {
