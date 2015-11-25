@@ -469,7 +469,7 @@ void adelante()
 } 
 void adelantelento()
 {
-  analogWrite(DerechaAdelante, (VelDerecha/2) + 50);  
+  analogWrite(DerechaAdelante, (VelDerecha/2) + 85);  
   analogWrite(DerechaAtras, LOW);  
   analogWrite(IzquierdaAdelante, (VelIzquierda/2));  
   analogWrite(IzquierdaAtras, LOW); 
@@ -503,14 +503,14 @@ void detenerselento()
   analogWrite(IzquierdaAdelante, LOW);  
   analogWrite(IzquierdaAtras, LOW); 
 
-  delay(25);
+  delay(75);
   
   analogWrite(DerechaAdelante, LOW);  
-  analogWrite(DerechaAtras, VelDerecha);  
+  analogWrite(DerechaAtras, (VelDerecha)*.5);  
   analogWrite(IzquierdaAdelante, LOW);  
-  analogWrite(IzquierdaAtras, VelIzquierda); 
+  analogWrite(IzquierdaAtras, (VelIzquierda)*.3); 
 
-  delay(25);
+  delay(75);
 
   analogWrite(DerechaAdelante, LOW);  
   analogWrite(DerechaAtras, LOW);  
@@ -526,10 +526,10 @@ void pararVuelta()
 }
 void derecha() 
 {  
-  analogWrite(DerechaAdelante, (VelDerecha*.65));  
+  analogWrite(DerechaAdelante, (VelDerecha*.5));  
   analogWrite(DerechaAtras, LOW);  
   analogWrite(IzquierdaAdelante, LOW);  
-  analogWrite(IzquierdaAtras, (VelIzquierda*.65)); 
+  analogWrite(IzquierdaAtras, (VelIzquierda*.5)); 
   
 } 
 void izquierda() 
@@ -544,8 +544,8 @@ void izquierda()
 void adelante30() 
 { 
   adelantelento(); 
-  delay(600); 
-  detenerse();
+  delay(480); 
+  detenerselento();
 }
 
 void izquierda90()
@@ -809,48 +809,7 @@ void FinIzq()
    }
 }
 
-void zonaB()
-{
-  int der=ultrasonico1();
-  delay(10);
-  int fr=ultrasonico2(); 
-  
-  if(der <= 9 && fr > 13) // Avanza al frente
-  {
-     while(fr > 13)
-     {
-      adelantelento();
-      fr=ultrasonico2();
-     }
-   detenerse();
-   der=ultrasonico1(); 
-   fr=ultrasonico2();
-   delay(250);
-  }
-  else if (der <= 9 && fr <= 5) // Izquierda
-  {
-    izquierda90();
-    pararVuelta();
-    der=ultrasonico1(); fr=ultrasonico2();
-    delay(250);
-  }
-  else if (der > 9) // Derecha
-  {
-   derecha90();
-   pararVuelta();
-   delay(250);
-      
-      while(fr > 13)
-      {
-      adelantelento();
-      fr=ultrasonico2();
-      }
-   detenerse();
-   der=ultrasonico1(); 
-   fr=ultrasonico2();
-   delay(250);
-   }
-}
+
 
 void continua()
 {
@@ -965,13 +924,57 @@ void SecUno()
   delay(100);
   regreso();
 }
+void zonaB()
+{
+  int der=ultrasonico1();
+  delay(10);
+  int fr=ultrasonico2(); 
+  Serial.println("Der: ");
+  Serial.println(der);
+  Serial.println("Fr: ");
+  Serial.println(fr);
 
+  if(der == 0 || fr == 0)
+  {
+    delay(250);
+    der = ultrasonico1();
+    delay(1);
+    fr = ultrasonico2();
+  }
+  
+  else if(der <= 9 && fr > 13) // Avanza al frente
+  {
+     
+      adelante30();
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+   delay(250);
+  }
+  else if (der <= 9 && fr <= 13) // Izquierda
+  {
+    izquierda90();
+    pararVuelta();
+    der=ultrasonico1(); fr=ultrasonico2();
+  Serial.println("Der en loop: ");
+  Serial.println(der);
+  Serial.println("Fr en loop: ");
+  Serial.println(fr);
+    delay(250);
+  }
+  else if (der > 9) // Derecha
+  {
+   derecha90();
+   pararVuelta();
+   delay(250);
+      
+      adelante30();
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+   delay(250);
+   }
+}
 void loop () 
 {
-  ultrasonico1();
-  /*
-  Serial.println(ultrasonico1());  
-  Serial.println("ultreasonico 2");
-  Serial.println(ultrasonico2());
-  */
+  zonaB();
+  delay(1000);
 }
