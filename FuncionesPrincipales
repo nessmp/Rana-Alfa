@@ -1,3 +1,10 @@
+//ultrasonicos
+
+int ultrasonico2trig = 7;
+int ultrasonico2ech = 6;
+int ultrasonico1trig = 9;
+int ultrasonico1ech = 8;
+
 //Color
 const int s0 = 51;  
 const int s1 = 53;  
@@ -27,7 +34,7 @@ byte IzquierdaAtras = 4;
 byte VelIzquierda = (255); 
 byte VelDerecha = (225) ; 
 
-//Ultrasonicos
+//vairables
 long distancia1;
 long tiempo1;  
 long distancia2;
@@ -83,7 +90,7 @@ void setup(){
     #endif
 
     
-    Serial.begin(115200);
+    Serial.begin(9600);
     while (!Serial); 
 
     mpu.initialize();
@@ -112,13 +119,22 @@ void setup(){
         packetSize = mpu.dmpGetFIFOPacketSize();
     } else {
         
+        /*
         Serial.print(F("DMP Initialization failed (code "));
         Serial.print(devStatus);
         Serial.println(F(")"));
+        */
     }
 
     // configure LED for output
     pinMode(LED_PIN, OUTPUT); 
+
+
+  //Ultrasonico
+  pinMode(ultrasonico1trig, OUTPUT);
+  pinMode(ultrasonico1ech, INPUT);
+  pinMode(ultrasonico2trig, OUTPUT);
+  pinMode(ultrasonico2ech, INPUT);
 
   //Motores
   pinMode(DerechaAdelante, OUTPUT); 
@@ -148,7 +164,8 @@ void setup(){
   for(int i=0; i<10; i++)
   {
   MPUestabilizar(); 
-  } 
+  }  
+ 
   
 }
 
@@ -169,7 +186,7 @@ void setup(){
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+        /*Serial.println(F("FIFO overflow!"));*/
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
@@ -185,26 +202,26 @@ void setup(){
         #ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
             mpu.dmpGetQuaternion(&q, fifoBuffer);
-            Serial.print("quat\t");
+            /*Serial.print("quat\t");
             Serial.print(q.w);
             Serial.print("\t");
             Serial.print(q.x);
             Serial.print("\t");
             Serial.print(q.y);
             Serial.print("\t");
-            Serial.println(q.z);
+            Serial.println(q.z);*/
         #endif
 
         #ifdef OUTPUT_READABLE_EULER
             // display Euler angles in degrees
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetEuler(euler, &q);
-            Serial.print("euler\t");
+            /*Serial.print("euler\t");
             Serial.print(euler[0] * 180/M_PI);
             Serial.print("\t");
             Serial.print(euler[1] * 180/M_PI);
             Serial.print("\t");
-            Serial.println(euler[2] * 180/M_PI);
+            Serial.println(euler[2] * 180/M_PI);*/
         #endif
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
@@ -212,13 +229,13 @@ void setup(){
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            Serial.print("ypr\t");
+            /*Serial.print("ypr\t");
             Serial.print(ypr[0] * 180/M_PI); //Valor de la vuelta
             Serial.print("\t");
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\t");
             Serial.println(ypr[2] * 180/M_PI);
-            heading=(ypr[0] * 180/M_PI);
+            heading=(ypr[0] * 180/M_PI);*/
             if(heading<0)
             {
               heading=map(heading,-179,-1, 180, 359);
@@ -232,12 +249,12 @@ void setup(){
             mpu.dmpGetAccel(&aa, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-            Serial.print("areal\t");
+            /*Serial.print("areal\t");
             Serial.print(aaReal.x);
             Serial.print("\t");
             Serial.print(aaReal.y);
             Serial.print("\t");
-            Serial.println(aaReal.z);
+            Serial.println(aaReal.z);*/
         #endif
 
         #ifdef OUTPUT_READABLE_WORLDACCEL
@@ -247,12 +264,12 @@ void setup(){
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
             mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-            Serial.print("aworld\t");
+            /*Serial.print("aworld\t");
             Serial.print(aaWorld.x);
             Serial.print("\t");
             Serial.print(aaWorld.y);
             Serial.print("\t");
-            Serial.println(aaWorld.z);
+            Serial.println(aaWorld.z);*/
         #endif
     
         #ifdef OUTPUT_TEAPOT
@@ -273,7 +290,7 @@ void setup(){
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
     } 
-    delay(2000);
+    delay(1000);
 
 } 
 
@@ -294,7 +311,7 @@ int MPU() {
     if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
         // reset so we can continue cleanly
         mpu.resetFIFO();
-        Serial.println(F("FIFO overflow!"));
+        /*Serial.println(F("FIFO overflow!"));*/
 
     // otherwise, check for DMP data ready interrupt (this should happen frequently)
     } else if (mpuIntStatus & 0x02) {
@@ -310,26 +327,26 @@ int MPU() {
         #ifdef OUTPUT_READABLE_QUATERNION
             // display quaternion values in easy matrix form: w x y z
             mpu.dmpGetQuaternion(&q, fifoBuffer);
-            Serial.print("quat\t");
+            /*Serial.print("quat\t");
             Serial.print(q.w);
             Serial.print("\t");
             Serial.print(q.x);
             Serial.print("\t");
             Serial.print(q.y);
             Serial.print("\t");
-            Serial.println(q.z);
+            Serial.println(q.z);*/
         #endif
 
         #ifdef OUTPUT_READABLE_EULER
             // display Euler angles in degrees
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetEuler(euler, &q);
-            Serial.print("euler\t");
+            /*Serial.print("euler\t");
             Serial.print(euler[0] * 180/M_PI);
             Serial.print("\t");
             Serial.print(euler[1] * 180/M_PI);
             Serial.print("\t");
-            Serial.println(euler[2] * 180/M_PI);
+            Serial.println(euler[2] * 180/M_PI);*/
         #endif
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
@@ -337,18 +354,18 @@ int MPU() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            Serial.print("ypr\t");
+            /*Serial.print("ypr\t");
             Serial.print(ypr[0] * 180/M_PI); //Valor de la vuelta
             Serial.print("\t");
             Serial.print(ypr[1] * 180/M_PI);
             Serial.print("\t");
-            Serial.println(ypr[2] * 180/M_PI);
+            Serial.println(ypr[2] * 180/M_PI);*/
             heading=(ypr[0] * 180/M_PI);
             if(heading<0)
             {
               heading=map(heading,-179,-1, 180, 359);
             }
-            Serial.println(heading);
+            //Serial.println(heading);
             
         #endif
 
@@ -358,12 +375,12 @@ int MPU() {
             mpu.dmpGetAccel(&aa, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
-            Serial.print("areal\t");
+            /*Serial.print("areal\t");
             Serial.print(aaReal.x);
             Serial.print("\t");
             Serial.print(aaReal.y);
             Serial.print("\t");
-            Serial.println(aaReal.z);
+            Serial.println(aaReal.z);*/
         #endif
 
         #ifdef OUTPUT_READABLE_WORLDACCEL
@@ -373,12 +390,12 @@ int MPU() {
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
             mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
-            Serial.print("aworld\t");
+            /*Serial.print("aworld\t");
             Serial.print(aaWorld.x);
             Serial.print("\t");
             Serial.print(aaWorld.y);
             Serial.print("\t");
-            Serial.println(aaWorld.z);
+            Serial.println(aaWorld.z);*/
         #endif
     
         #ifdef OUTPUT_TEAPOT
@@ -406,12 +423,12 @@ int MPU() {
 //Sensor derecha
 int ultrasonico1 () 
 { 
-  digitalWrite(9,LOW);  
-  //delayMicroseconds(5);
-  //digitalWrite(9, HIGH);   
-  //delayMicroseconds(10);  
+  digitalWrite(ultrasonico1trig,LOW);  
+  delayMicroseconds(5);
+  digitalWrite(ultrasonico1trig, HIGH);   
+  delayMicroseconds(10);  
  
-  tiempo1 = pulseIn(8, HIGH);   
+  tiempo1 = pulseIn(ultrasonico1ech, HIGH);   
 
   distancia1= int(0.017*tiempo1);  
   
@@ -425,12 +442,12 @@ int ultrasonico1 ()
 //Sensor frontal
 int ultrasonico2 () 
 { 
-  digitalWrite(7,LOW);
+  digitalWrite(ultrasonico2trig,LOW);
   delayMicroseconds(5);
-  digitalWrite(7, HIGH); 
+  digitalWrite(ultrasonico2trig, HIGH); 
   delayMicroseconds(10);  
  
-  tiempo1 = pulseIn(6, HIGH);   
+  tiempo1 = pulseIn(ultrasonico2ech, HIGH);   
 
   distancia1= int(0.017*tiempo1);  
   
@@ -485,11 +502,15 @@ void detenerselento()
   analogWrite(DerechaAtras, LOW);  
   analogWrite(IzquierdaAdelante, LOW);  
   analogWrite(IzquierdaAtras, LOW); 
+
+  delay(25);
   
   analogWrite(DerechaAdelante, LOW);  
   analogWrite(DerechaAtras, VelDerecha);  
   analogWrite(IzquierdaAdelante, LOW);  
-  analogWrite(IzquierdaAtras, VelIzquierda);  
+  analogWrite(IzquierdaAtras, VelIzquierda); 
+
+  delay(25);
 
   analogWrite(DerechaAdelante, LOW);  
   analogWrite(DerechaAtras, LOW);  
@@ -703,8 +724,8 @@ void Empieza()
     }
     sColor = color();
     iDistancia = ultrasonico2();
-    //Serial.println("iDistancia: ");
-    //Serial.println(iDistancia);
+    Serial.println("iDistancia: ");
+    Serial.println(iDistancia);
   }
   detenerse();
   delay(10);
@@ -785,6 +806,49 @@ void FinIzq()
      }
      detenerse();
      delay(100);
+   }
+}
+
+void zonaB()
+{
+  int der=ultrasonico1();
+  delay(10);
+  int fr=ultrasonico2(); 
+  
+  if(der <= 9 && fr > 13) // Avanza al frente
+  {
+     while(fr > 13)
+     {
+      adelantelento();
+      fr=ultrasonico2();
+     }
+   detenerse();
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+   delay(250);
+  }
+  else if (der <= 9 && fr <= 5) // Izquierda
+  {
+    izquierda90();
+    pararVuelta();
+    der=ultrasonico1(); fr=ultrasonico2();
+    delay(250);
+  }
+  else if (der > 9) // Derecha
+  {
+   derecha90();
+   pararVuelta();
+   delay(250);
+      
+      while(fr > 13)
+      {
+      adelantelento();
+      fr=ultrasonico2();
+      }
+   detenerse();
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+   delay(250);
    }
 }
 
@@ -880,7 +944,8 @@ void regreso()
   }
   detenerse();
   delay(100);
-}
+} 
+
 void SecUno()
 {
   delay(100);
@@ -903,31 +968,10 @@ void SecUno()
 
 void loop () 
 {
-  //adelantelento();
-  adelanteMPU();
+  ultrasonico1();
   /*
-  int distancia = ultrasonico2();
-  bool correcto = false;
-  while (correcto == false)
-  {
-    distancia = ultrasonico2();
-    if (distancia > 15)
-    {
-      adelante();
-    }
-    if(distancia < 15)
-    {
-      detenerselento();
-      pararVuelta();
-      delay(100);
-      distancia = ultrasonico2();
-      if(distancia < 9)
-      {
-        correcto = true;
-      }
-    }
-  }
-  Serial.println("ultrasonico: ");
-  Serial.println(ultrasonico2());*/
-  
+  Serial.println(ultrasonico1());  
+  Serial.println("ultreasonico 2");
+  Serial.println(ultrasonico2());
+  */
 }
