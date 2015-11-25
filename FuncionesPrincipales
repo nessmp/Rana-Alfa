@@ -44,6 +44,8 @@ int Db = 175;
 int Ia = 175;
 int Ib = 175;
 
+//ZonaB
+int cont=0;
 
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
@@ -544,7 +546,7 @@ void izquierda()
 void adelante30() 
 { 
   adelantelento(); 
-  delay(480); 
+  delay(500); 
   detenerselento();
 }
 
@@ -671,16 +673,8 @@ String color()
   //count OUT, pGreen, GREEN  
   green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
-  Serial.println("green");
-  Serial.println(green);
-  Serial.println("blue");
-  Serial.println(blue);
-  Serial.println("red");
-  Serial.println(red);
-  Serial.println("");
 
-
-   if ((green >= 18 && green <= 24) && (blue >= 7 && blue <= 20) && (red >= 17 &&  red <= 30))
+   if ((green >= 10 && green <= 30) && (blue >= 3 && blue <= 20) && (red >= 18 &&  red <= 30))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
@@ -688,7 +682,7 @@ String color()
     colon = "white";
     
   }
-  else if ((green > 84 && green < 91) && (blue > 62 && blue < 80) && (red > 128 &&  red < 149))
+  else if ((green > 50 && green < 70) && (blue > 45 && blue < 60) && (red > 85 &&  red < 100))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
@@ -696,14 +690,14 @@ String color()
     colon = "green";
     digitalWrite(LedG, HIGH);
   }
-  else if ((green > 126 && green < 140) && (blue > 80 && blue < 100) && (red > 154 &&  red < 172))
+  else if ((green > 80 && green < 110) && (blue > 50 && blue < 70) && (red > 100 &&  red < 120))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
     digitalWrite(LedB, LOW);
     colon = "black";
   }
-  else if ((green > 79 && green < 92) && (blue > 50 && blue < 69) && (red > 28 &&  red < 46))
+  else if ((green > 60 && green < 70) && (blue > 38 && blue < 51) && (red > 30 &&  red < 40))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
@@ -937,51 +931,77 @@ void zonaB()
   int der=ultrasonico1();
   delay(10);
   int fr=ultrasonico2(); 
+
   Serial.println("Der: ");
   Serial.println(der);
   Serial.println("Fr: ");
   Serial.println(fr);
 
-  if(der == 0 || fr == 0)
+  if (cont>=2)
+  {
+    adelante30();
+    cont=0;
+  }
+
+  else if(der == 0 || fr == 0)
   {
     delay(250);
     der = ultrasonico1();
     delay(1);
     fr = ultrasonico2();
-  }
-  
-  else if(der <= 9 && fr > 13) // Avanza al frente
-  {
-     
-      adelante30();
-   der=ultrasonico1(); 
-   fr=ultrasonico2();
-   delay(250);
-  }
-  else if (der <= 9 && fr <= 13) // Izquierda
-  {
-    izquierda90();
-    pararVuelta();
-    der=ultrasonico1(); fr=ultrasonico2();
-  Serial.println("Der en loop: ");
-  Serial.println(der);
-  Serial.println("Fr en loop: ");
-  Serial.println(fr);
-    delay(250);
+    cont=0;
   }
   else if (der > 9) // Derecha
   {
    derecha90();
    pararVuelta();
    delay(250);
+   fr=ultrasonico2();
+     delay(100);
+     /*while(fr > 13)
+     {
+      adelantelento();
+      fr=ultrasonico2();
       
-      adelante30();
+     }*/
+     adelante30();
+    //detenerselento();  
+   delay(250);
    der=ultrasonico1(); 
    fr=ultrasonico2();
-   delay(250);
+   cont=0;
    }
+  else if( fr > 20 && cont<2) // Avanza al frente
+  {
+     while(fr > 20)
+     {
+      adelantelento();
+      fr=ultrasonico2();
+      
+     }
+    detenerselento();  
+   cont=0;
+   delay(250);
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+  }
+  else if (der <= 9 && fr <= 13) // Izquierda
+  {
+    izquierda90();
+    pararVuelta();
+   cont++;
+    delay(250);
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+  }
+
 }
+
 void loop () 
 {
+ 
+ zonaB();
+  delay(1000);
+  
   
 }
