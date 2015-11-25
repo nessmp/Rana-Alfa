@@ -16,6 +16,7 @@ String colon = "";
 //MPU
 int heading;
 
+
 //Motores
 byte DerechaAdelante = 5; 
 byte DerechaAtras = 10; 
@@ -31,6 +32,10 @@ long distancia1;
 long tiempo1;  
 long distancia2;
 long tiempo2;   
+int Da = 175;
+int Db = 175;
+int Ia = 175;
+int Ib = 175;
 
 
 #include "I2Cdev.h"
@@ -447,9 +452,9 @@ void adelante()
 } 
 void adelantelento()
 {
-  analogWrite(DerechaAdelante, VelDerecha/2);  
+  analogWrite(DerechaAdelante, (VelDerecha/2) + 50);  
   analogWrite(DerechaAtras, LOW);  
-  analogWrite(IzquierdaAdelante,(VelIzquierda/2) + 24);  
+  analogWrite(IzquierdaAdelante, (VelIzquierda/2));  
   analogWrite(IzquierdaAtras, LOW); 
 }
 void detenerse() 
@@ -473,6 +478,24 @@ void detenerse()
   analogWrite(IzquierdaAdelante, LOW);  
   analogWrite(IzquierdaAtras, LOW); 
 } 
+
+void detenerselento()
+{
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, VelDerecha);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, VelIzquierda);  
+
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+}
 void pararVuelta()
 {
   analogWrite(DerechaAdelante, LOW);  
@@ -495,6 +518,13 @@ void izquierda()
   analogWrite(IzquierdaAdelante, (VelIzquierda*.5));  
   analogWrite(IzquierdaAtras, LOW); 
   
+}
+
+void adelante30() 
+{ 
+  adelantelento(); 
+  delay(600); 
+  detenerse();
 }
 
 void izquierda90()
@@ -557,9 +587,58 @@ void derecha90()
   g1=MPU();
 }
 
+void adelanteMPU()
+{
+  int g1 = MPU();
+  int g2 = g1 + 3;
+  if(g2 > 360)
+  {
+    g2 -= 360;
+  }
+  int g3 = g1 - 3;
+  if(g3 < 0)
+  {
+    g2 += 360;
+  }
+  
+  if(g1 > g2)
+  {
+    int iI = 0;
+    while(g2 < g1)
+    {
+      analogWrite(DerechaAdelante, ((VelDerecha/2) + 50 ) + iI);  
+      analogWrite(DerechaAtras, LOW);  
+      analogWrite(IzquierdaAdelante, (VelIzquierda/2));  
+      analogWrite(IzquierdaAtras, LOW);
+      iI++;
+      g1 = MPU();
+    }
+  }
+  else if(g1 < g3)
+  {
+    int iI = 0;
+    while(g2 > g1)
+    {
+      analogWrite(DerechaAdelante,((VelDerecha/2)+ 50));  
+      analogWrite(DerechaAtras, LOW);  
+      analogWrite(IzquierdaAdelante, (VelIzquierda/2) + iI);  
+      analogWrite(IzquierdaAtras, LOW);
+      g1 = MPU();
+    }
+  }
+  else
+  {
+       
+      analogWrite(DerechaAdelante, (VelDerecha/2) + 50);  
+      analogWrite(DerechaAtras, LOW);  
+      analogWrite(IzquierdaAdelante, (VelIzquierda/2));  
+      analogWrite(IzquierdaAtras, LOW);
+  }
+}
+
 String color()  
 {    
-  Serial.println("Entra a color() ");
+  //Serial.println("Entra a color() ");
   digitalWrite(s2, LOW);  
   digitalWrite(s3, LOW);  
   //count OUT, pRed, RED  
@@ -606,6 +685,249 @@ String color()
   return colon;
 }
 
+void Empieza()
+{
+  int iDistancia = ultrasonico2();
+  String sColor = color();
+  while (iDistancia > 9)
+  {
+    adelantelento();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    sColor = color();
+    iDistancia = ultrasonico2();
+    //Serial.println("iDistancia: ");
+    //Serial.println(iDistancia);
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  bool Listo = false;
+  while(Listo == false)
+  {
+     if (sColor == "red")
+     {
+       izquierda90();
+       delay(10);
+       izquierda90();
+       delay(10);
+       izquierda90();
+       delay(10);
+       Listo = true;
+     }
+     else 
+     {
+       derecha90();
+       Listo = true;
+     }
+     pararVuelta();
+     delay(100);
+  }
+}
+
+void FinDer()
+{
+  adelante30();
+  detenerse();
+  delay(100);
+  String sColor = color();
+  bool Listo = false;
+  while(Listo == false)
+  {
+      if (sColor == "red")
+      {
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        Listo = true;
+      }
+      else 
+      {
+        derecha90();
+        Listo = true;
+      }
+      pararVuelta();
+      delay(100);
+  }
+}
+
+void FinIzq()
+{
+  String sColor = color();
+  bool Listo = false;
+  while(Listo == false)
+  {
+     if(sColor == "green")
+     {
+       derecha90();
+       delay(10);
+       derecha90();
+       delay(10);
+       derecha90();
+       delay(10);
+       Listo == true;
+     }
+     else
+     {
+       izquierda90();
+       delay(10);
+       Listo = true;
+     }
+     detenerse();
+     delay(100);
+   }
+}
+
+void continua()
+{
+  int iDistancia = ultrasonico2();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    adelantelento();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    iDistancia = ultrasonico2();
+    sColor = color();
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  bool Listo = false;
+  while (Listo == false)
+  {
+      if(sColor == "green")
+      {
+        derecha90();
+        delay(10);
+        derecha90();
+        delay(10);
+        derecha90();
+        delay(10);
+        Listo = true;
+      }
+      else
+      {
+        izquierda90();
+        delay(10);
+        Listo = true;
+      }
+  }
+  pararVuelta();
+  delay(10);
+  adelante30();
+  detenerse();
+  delay(10);
+}
+
+void regreso()
+{
+  String sColor = color();
+  bool Listo = false;
+  while (Listo == false)
+  {
+      if (sColor == "red")
+      {
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        pararVuelta();
+        delay(100);
+        Listo = true;
+      }
+      else
+      {
+        derecha90();
+        pararVuelta();
+        delay(100);
+        Listo = true;
+      }
+      sColor = color();
+  }
+  sColor = color();
+  while (sColor != "plateado")
+  {
+    adelantelento();
+    sColor = color();
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+  }
+  detenerse();
+  delay(100);
+}
+void SecUno()
+{
+  delay(100);
+  Empieza();
+  delay(100);
+  FinDer();
+  delay(100);
+  continua();
+  delay(100);
+  FinIzq();
+  delay(100);
+  Empieza();
+  delay(100);
+  FinDer();
+  delay(100);
+  continua();
+  delay(100);
+  regreso();
+}
+
 void loop () 
-{ 
+{
+  //adelantelento();
+  adelanteMPU();
+  /*
+  int distancia = ultrasonico2();
+  bool correcto = false;
+  while (correcto == false)
+  {
+    distancia = ultrasonico2();
+    if (distancia > 15)
+    {
+      adelante();
+    }
+    if(distancia < 15)
+    {
+      detenerselento();
+      pararVuelta();
+      delay(100);
+      distancia = ultrasonico2();
+      if(distancia < 9)
+      {
+        correcto = true;
+      }
+    }
+  }
+  Serial.println("ultrasonico: ");
+  Serial.println(ultrasonico2());*/
+  
 }
