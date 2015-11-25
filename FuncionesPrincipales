@@ -671,8 +671,16 @@ String color()
   //count OUT, pGreen, GREEN  
   green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
 
+  Serial.println("green");
+  Serial.println(green);
+  Serial.println("blue");
+  Serial.println(blue);
+  Serial.println("red");
+  Serial.println(red);
+  Serial.println("");
 
-   if ((green >= 10 && green <= 30) && (blue >= 3 && blue <= 20) && (red >= 18 &&  red <= 30))
+
+   if ((green >= 18 && green <= 24) && (blue >= 7 && blue <= 20) && (red >= 17 &&  red <= 30))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
@@ -680,7 +688,7 @@ String color()
     colon = "white";
     
   }
-  else if ((green > 50 && green < 70) && (blue > 45 && blue < 60) && (red > 85 &&  red < 100))
+  else if ((green > 84 && green < 91) && (blue > 62 && blue < 80) && (red > 128 &&  red < 149))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
@@ -688,14 +696,14 @@ String color()
     colon = "green";
     digitalWrite(LedG, HIGH);
   }
-  else if ((green > 80 && green < 110) && (blue > 50 && blue < 70) && (red > 100 &&  red < 120))
+  else if ((green > 126 && green < 140) && (blue > 80 && blue < 100) && (red > 154 &&  red < 172))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
     digitalWrite(LedB, LOW);
     colon = "black";
   }
-  else if ((green > 60 && green < 70) && (blue > 38 && blue < 51) && (red > 30 &&  red < 40))
+  else if ((green > 79 && green < 92) && (blue > 50 && blue < 69) && (red > 28 &&  red < 46))
   {
     digitalWrite(LedR, LOW);
     digitalWrite(LedG, LOW);
@@ -975,6 +983,5 @@ void zonaB()
 }
 void loop () 
 {
-  zonaB();
-  delay(1000);
+  
 }
