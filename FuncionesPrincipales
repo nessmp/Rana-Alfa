@@ -713,7 +713,7 @@ String color()
   }
   return colon;
 }
-
+/*
 void Empieza()
 {
   int iDistancia = ultrasonico2();
@@ -932,6 +932,32 @@ void SecUno()
   delay(100);
   regreso();
 }
+*/
+void zonaA()
+{
+  int enf = ultrasonico2();
+  String col = color();
+  if(enf == 0)
+  {
+    delay(250);
+    enf = ultrasonico2();
+  }
+  else if(enf > 13)
+  {
+    while( enf > 13)
+    {
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+    }
+    detenerselento();
+    delay(250);
+  }
+
+}
+
+
 void zonaB()
 {
   int der=ultrasonico1();
@@ -953,10 +979,10 @@ void zonaB()
   else if(der <= 9 && fr > 13) // Avanza al frente
   {
      
-      adelante30();
+   adelante30();
    der=ultrasonico1(); 
    fr=ultrasonico2();
-   delay(250);
+   delay(500);
   }
   else if (der <= 9 && fr <= 13) // Izquierda
   {
@@ -967,21 +993,21 @@ void zonaB()
   Serial.println(der);
   Serial.println("Fr en loop: ");
   Serial.println(fr);
-    delay(250);
+    delay(500);
   }
   else if (der > 9) // Derecha
   {
    derecha90();
    pararVuelta();
-   delay(250);
+   delay(500);
       
       adelante30();
    der=ultrasonico1(); 
    fr=ultrasonico2();
-   delay(250);
+   delay(500);
    }
 }
 void loop () 
 {
-  
+  zonaA();
 }
