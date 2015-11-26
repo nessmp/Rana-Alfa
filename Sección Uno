@@ -1,205 +1,222 @@
-void Empieza()
-{
-  int iDistancia = ultrasonico2();
-  String sColor = color();
-  while (iDistancia > 5)
-  {
-    adelante();
+bool primera = false;
 
-    if (sColor == "red")
-    {
-      digitalWrite(LedR, HIGH);
-    }
-    if (sColor == "green")
-    {
-      digitalWrite(LedG, HIGH);
-    }
-    sColor = color();
-    iDistancia = ultrasonico2();
-  }
-  detenerse();
-  delay(10);
-  sColor = color();
-  bool Listo = false;
-  while(Listo == false)
-  {
-     if (sColor == "red")
-     {
-       izquierda90();
-       delay(10);
-       izquierda90();
-       delay(10);
-       izquierda90();
-       delay(10);
-       Listo = true;
-     }
-     else 
-     {
-       derecha90();
-       Listo = true;
-     }
-     pararVuelta();
-     delay(100);
-  }
-}
-
-void FinDer()
+void zonaA()
 {
-  adelante30();
-  detenerse();
-  delay(100);
-  String sColor = color();
-  bool Listo = false;
-  while(Listo == false)
+  int enf = ultrasonico2();
+  String col = color();
+  primera = true;
+  bool segunda = false;
+  bool tercera = false;
+  bool cuarta = false;
+  
+  if(primera = true)
   {
-      if (sColor == "red")
+  if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
       {
-        izquierda90();
-        delay(10);
-        izquierda90();
-        delay(10);
-        izquierda90();
-        delay(10);
-        Listo = true;
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
       }
-      else 
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "red")
+      {
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
+      }
+      else
       {
         derecha90();
-        Listo = true;
       }
-      pararVuelta();
-      delay(100);
-  }
-}
-
-void FinIzq()
-{
-  String sColor = color();
-  bool Listo = false;
-  while(Listo == false)
-  {
-     if(sColor == "green")
-     {
-       derecha90();
-       delay(10);
-       derecha90();
-       delay(10);
-       derecha90();
-       delay(10);
-       Listo == true;
-     }
-     else
-     {
-       izquierda90();
-       delay(10);
-       Listo = true;
-     }
-     detenerse();
-     delay(100);
+      delay(300);
+      adelante30();
+      delay(300);
+      col = color();
+      if(col == "red")
+      {
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+      }
+      else
+      {
+        derecha90();
+      }
+      primera = false;
+      segunda = true;
    }
-}
-
-void continua()
-{
-  int iDistancia = ultrasonico2();
-  String sColor = color();
-  while (iDistancia > 5)
-  {
-    adelante();
-
-    if (sColor == "red")
-    {
-      digitalWrite(LedR, HIGH);
-    }
-    if (sColor == "green")
-    {
-      digitalWrite(LedG, HIGH);
-    }
-    iDistancia = ultrasonico2();
-    sColor = color();
   }
-  detenerse();
-  delay(10);
-  sColor = color();
-  bool Listo = false;
-  while (Listo == false)
+  
+  if(segunda == true)
   {
-      if(sColor == "green")
+    delay(300);
+    if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
       {
-        derecha90();
-        delay(10);
-        derecha90();
-        delay(10);
-        derecha90();
-        delay(10);
-        Listo = true;
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+      }
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "green")
+      {
+         derecha90();
+         delay(300);
+         derecha90();
+         delay(300);
+         derecha90();
+         delay(300);
       }
       else
       {
         izquierda90();
-        delay(10);
-        Listo = true;
       }
-  }
-  pararVuelta();
-  delay(10);
-  adelante30();
-  detenerse();
-  delay(10);
-}
-
-void regreso()
-{
-  String sColor = color();
-  bool Listo = false;
-  while (Listo == false)
-  {
-      if (sColor == "red")
+      delay(300);
+      adelante30();
+      delay(300);
+      col = color();
+      if(col == "green")
+      {
+        derecha90();
+        delay(300);
+        derecha90();
+        delay(300);
+        derecha90();
+        delay(300);
+      }
+      else
       {
         izquierda90();
-        delay(10);
-        izquierda90();
-        delay(10);
-        izquierda90();
-        delay(10);
-        pararVuelta();
-        delay(100);
-        Listo = true;
+      }
+      segunda = false;
+      tercera = true;
+   }
+   }
+   
+   if(tercera == true)
+   {
+    delay(300);
+    if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
+      {
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+      }
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "red")
+      {
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
       }
       else
       {
         derecha90();
-        pararVuelta();
-        delay(100);
-        Listo = true;
       }
-      sColor = color();
-  }
-  sColor = color();
-  while (sColor != "plateado")
-  {
-    adelante();
-    sColor = color();
-    if (sColor == "red")
-    {
-      digitalWrite(LedR, HIGH);
-    }
-    if (sColor == "green")
-    {
-      digitalWrite(LedG, HIGH);
-    }
-  }
-  detenerse();
-  delay(100);
-}
-void SecUno()
-{
-  Empieza();
-  FinDer();
-  continua();
-  FinIzq();
-  Empieza();
-  FinDer();
-  continua();
-  regreso();
+      delay(300);
+      adelante30();
+      delay(300);
+      col = color();
+      if(col == "red")
+      {
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+      }
+      else
+      {
+        derecha90();
+      }
+      tercera = false;
+      cuarta = true;
+   }
+   }
+   
+   if(cuarta == true)
+   {
+    enf = ultrasonico2();
+    delay(300);
+    if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
+      {
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+      }
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "red")
+      {
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+      }
+      else
+      {
+        derecha90();
+        delay(300);
+        derecha90();
+        delay(300);
+      }
+      delay(300);
+      col = color();
+      while(col != "plateado")
+      {
+        adelantelento();
+        col = color();
+      }
+      detenerse();
+      cuarta =false;
+   }
+   }  
 }
