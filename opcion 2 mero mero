@@ -1,0 +1,1077 @@
+//ultrasonicos
+
+int ultrasonico2trig = 7;
+int ultrasonico2ech = 6;
+int ultrasonico1trig = 9;
+int ultrasonico1ech = 8;
+
+//Color
+const int s0 = 51;  
+const int s1 = 53;  
+const int s2 = 50;  
+const int s3 = 52;  
+const int out = 48;   
+
+int LedR = 11;
+int LedG = 12;
+int LedB = 49;
+
+int red = 0;  
+int green = 0;  
+int blue = 0;  
+String colon = "";
+
+//MPU
+int heading;
+
+
+//Motores
+byte DerechaAdelante = 5; 
+byte DerechaAtras = 10; 
+byte IzquierdaAdelante = 3; 
+byte IzquierdaAtras = 4;  
+
+//Velocidad
+byte VelIzquierda = (255); 
+byte VelDerecha = (225) ; 
+
+//vairables
+long distancia1;
+long tiempo1;  
+long distancia2;
+long tiempo2;   
+int Da = 175;
+int Db = 175;
+int Ia = 175;
+int Ib = 175;
+
+//ZonaB
+int cont=0;
+
+#include "I2Cdev.h"
+#include "MPU6050_6Axis_MotionApps20.h"
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+#include "Wire.h"
+#endif
+
+MPU6050 mpu;
+
+#define OUTPUT_READABLE_YAWPITCHROLL
+#define LED_PIN 13 
+bool blinkState = false;
+bool dmpReady = false;  
+uint8_t mpuIntStatus;   
+uint8_t devStatus;      
+uint16_t packetSize;    
+uint16_t fifoCount;    
+uint8_t fifoBuffer[64]; 
+
+
+Quaternion q;           
+VectorInt16 aa;         
+VectorInt16 aaReal;     
+VectorInt16 aaWorld;    
+VectorFloat gravity;    
+float euler[3];         
+float ypr[3];          
+
+uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
+
+volatile bool mpuInterrupt = false;     
+void dmpDataReady() 
+{
+   mpuInterrupt = true;
+}
+
+void setup(){ 
+  
+  #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+        Wire.begin();
+        TWBR = 24;
+    #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+        Fastwire::setup(400, true);
+    #endif
+
+    
+    Serial.begin(9600);
+    while (!Serial); 
+
+    mpu.initialize();
+    devStatus = mpu.dmpInitialize();
+
+    // supply your own gyrço offsets here, scaled for min sensitivity
+    mpu.setXGyroOffset(-40);
+    mpu.setYGyroOffset(-163);
+    mpu.setZGyroOffset(39);
+    mpu.setXAccelOffset(-76);
+    mpu.setYAccelOffset(-2359);
+    mpu.setZAccelOffset(1688); // 1688 factory default for my test chip
+
+   
+    if (devStatus == 0) {
+        // turn on the DMP, now that it's ready
+        mpu.setDMPEnabled(true);
+
+        // enable Arduino interrupt detection
+        attachInterrupt(0, dmpDataReady, RISING);
+        mpuIntStatus = mpu.getIntStatus();
+        
+        dmpReady = true;
+
+        // get expected DMP packet size for later comparison
+        packetSize = mpu.dmpGetFIFOPacketSize();
+    } else {
+        
+        /*
+        Serial.print(F("DMP Initialization failed (code "));
+        Serial.print(devStatus);
+        Serial.println(F(")"));
+        */
+    }
+
+    // configure LED for output
+    pinMode(LED_PIN, OUTPUT); 
+
+
+  //Ultrasonico
+  pinMode(ultrasonico1trig, OUTPUT);
+  pinMode(ultrasonico1ech, INPUT);
+  pinMode(ultrasonico2trig, OUTPUT);
+  pinMode(ultrasonico2ech, INPUT);
+
+  //Motores
+  pinMode(DerechaAdelante, OUTPUT); 
+  pinMode(DerechaAtras, OUTPUT); 
+  pinMode(IzquierdaAdelante, OUTPUT); 
+  pinMode(IzquierdaAtras, OUTPUT);
+  
+  //Ultrasonicos
+  pinMode(9, OUTPUT); /*activación del pin 9 como salida: para el pulso ultrasónico*/
+  pinMode(8, INPUT); /*activación del pin 8 como entrada: tiempo del rebote del ultrasonido*/ 
+  pinMode(7, OUTPUT); 
+  pinMode(6, INPUT); 
+
+  //Color
+  pinMode(s0, OUTPUT);  
+  pinMode(s1, OUTPUT);  
+  pinMode(s2, OUTPUT);  
+  pinMode(s3, OUTPUT);  
+  pinMode(out, INPUT);   
+  pinMode(LedR, OUTPUT);
+  pinMode(LedG, OUTPUT);
+  pinMode(LedB, OUTPUT);
+  digitalWrite(s0, HIGH);  
+  digitalWrite(s1, HIGH);  
+  
+  //Estabilizador del MPU
+  for(int i=0; i<10; i++)
+  {
+  MPUestabilizar(); 
+  }  
+ 
+  
+}
+
+  void MPUestabilizar() {
+   
+    while (!mpuInterrupt && fifoCount < packetSize) {
+        
+    }
+
+    
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
+
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
+
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+        // reset so we can continue cleanly
+        mpu.resetFIFO();
+        /*Serial.println(F("FIFO overflow!"));*/
+
+    // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } else if (mpuIntStatus & 0x02) {
+        // wait for correct available data length, should be a VERY short wait
+        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+        // read a packet from FIFO
+        mpu.getFIFOBytes(fifoBuffer, packetSize);
+        
+       
+        fifoCount -= packetSize;
+
+        #ifdef OUTPUT_READABLE_QUATERNION
+            // display quaternion values in easy matrix form: w x y z
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            /*Serial.print("quat\t");
+            Serial.print(q.w);
+            Serial.print("\t");
+            Serial.print(q.x);
+            Serial.print("\t");
+            Serial.print(q.y);
+            Serial.print("\t");
+            Serial.println(q.z);*/
+        #endif
+
+        #ifdef OUTPUT_READABLE_EULER
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetEuler(euler, &q);
+            /*Serial.print("euler\t");
+            Serial.print(euler[0] * 180/M_PI);
+            Serial.print("\t");
+            Serial.print(euler[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(euler[2] * 180/M_PI);*/
+        #endif
+
+        #ifdef OUTPUT_READABLE_YAWPITCHROLL
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            /*Serial.print("ypr\t");
+            Serial.print(ypr[0] * 180/M_PI); //Valor de la vuelta
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);
+            heading=(ypr[0] * 180/M_PI);*/
+            if(heading<0)
+            {
+              heading=map(heading,-179,-1, 180, 359);
+            }
+            Serial.println(heading);
+        #endif
+
+        #ifdef OUTPUT_READABLE_REALACCEL
+            // display real acceleration, adjusted to remove gravity
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            /*Serial.print("areal\t");
+            Serial.print(aaReal.x);
+            Serial.print("\t");
+            Serial.print(aaReal.y);
+            Serial.print("\t");
+            Serial.println(aaReal.z);*/
+        #endif
+
+        #ifdef OUTPUT_READABLE_WORLDACCEL
+            
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+            /*Serial.print("aworld\t");
+            Serial.print(aaWorld.x);
+            Serial.print("\t");
+            Serial.print(aaWorld.y);
+            Serial.print("\t");
+            Serial.println(aaWorld.z);*/
+        #endif
+    
+        #ifdef OUTPUT_TEAPOT
+            // display quaternion values in InvenSense Teapot demo format:
+            teapotPacket[2] = fifoBuffer[0];
+            teapotPacket[3] = fifoBuffer[1];
+            teapotPacket[4] = fifoBuffer[4];
+            teapotPacket[5] = fifoBuffer[5];
+            teapotPacket[6] = fifoBuffer[8];
+            teapotPacket[7] = fifoBuffer[9];
+            teapotPacket[8] = fifoBuffer[12];
+            teapotPacket[9] = fifoBuffer[13];
+            Serial.write(teapotPacket, 14);
+            teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
+        #endif
+
+        // blink LED to indicate activity
+        blinkState = !blinkState;
+        digitalWrite(LED_PIN, blinkState);
+    } 
+    delay(1000);
+
+} 
+
+int MPU() {
+   
+    while (!mpuInterrupt && fifoCount < packetSize) {
+        
+    }
+
+    
+    mpuInterrupt = false;
+    mpuIntStatus = mpu.getIntStatus();
+
+    // get current FIFO count
+    fifoCount = mpu.getFIFOCount();
+
+    // check for overflow (this should never happen unless our code is too inefficient)
+    if ((mpuIntStatus & 0x10) || fifoCount == 1024) {
+        // reset so we can continue cleanly
+        mpu.resetFIFO();
+        /*Serial.println(F("FIFO overflow!"));*/
+
+    // otherwise, check for DMP data ready interrupt (this should happen frequently)
+    } else if (mpuIntStatus & 0x02) {
+        // wait for correct available data length, should be a VERY short wait
+        while (fifoCount < packetSize) fifoCount = mpu.getFIFOCount();
+
+        // read a packet from FIFO
+        mpu.getFIFOBytes(fifoBuffer, packetSize);
+        
+       
+        fifoCount -= packetSize;
+
+        #ifdef OUTPUT_READABLE_QUATERNION
+            // display quaternion values in easy matrix form: w x y z
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            /*Serial.print("quat\t");
+            Serial.print(q.w);
+            Serial.print("\t");
+            Serial.print(q.x);
+            Serial.print("\t");
+            Serial.print(q.y);
+            Serial.print("\t");
+            Serial.println(q.z);*/
+        #endif
+
+        #ifdef OUTPUT_READABLE_EULER
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetEuler(euler, &q);
+            /*Serial.print("euler\t");
+            Serial.print(euler[0] * 180/M_PI);
+            Serial.print("\t");
+            Serial.print(euler[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(euler[2] * 180/M_PI);*/
+        #endif
+
+        #ifdef OUTPUT_READABLE_YAWPITCHROLL
+            // display Euler angles in degrees
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+            /*Serial.print("ypr\t");
+            Serial.print(ypr[0] * 180/M_PI); //Valor de la vuelta
+            Serial.print("\t");
+            Serial.print(ypr[1] * 180/M_PI);
+            Serial.print("\t");
+            Serial.println(ypr[2] * 180/M_PI);*/
+            heading=(ypr[0] * 180/M_PI);
+            if(heading<0)
+            {
+              heading=map(heading,-179,-1, 180, 359);
+            }
+            //Serial.println(heading);
+            
+        #endif
+
+        #ifdef OUTPUT_READABLE_REALACCEL
+            // display real acceleration, adjusted to remove gravity
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            /*Serial.print("areal\t");
+            Serial.print(aaReal.x);
+            Serial.print("\t");
+            Serial.print(aaReal.y);
+            Serial.print("\t");
+            Serial.println(aaReal.z);*/
+        #endif
+
+        #ifdef OUTPUT_READABLE_WORLDACCEL
+            
+            mpu.dmpGetQuaternion(&q, fifoBuffer);
+            mpu.dmpGetAccel(&aa, fifoBuffer);
+            mpu.dmpGetGravity(&gravity, &q);
+            mpu.dmpGetLinearAccel(&aaReal, &aa, &gravity);
+            mpu.dmpGetLinearAccelInWorld(&aaWorld, &aaReal, &q);
+            /*Serial.print("aworld\t");
+            Serial.print(aaWorld.x);
+            Serial.print("\t");
+            Serial.print(aaWorld.y);
+            Serial.print("\t");
+            Serial.println(aaWorld.z);*/
+        #endif
+    
+        #ifdef OUTPUT_TEAPOT
+            // display quaternion values in InvenSense Teapot demo format:
+            teapotPacket[2] = fifoBuffer[0];
+            teapotPacket[3] = fifoBuffer[1];
+            teapotPacket[4] = fifoBuffer[4];
+            teapotPacket[5] = fifoBuffer[5];
+            teapotPacket[6] = fifoBuffer[8];
+            teapotPacket[7] = fifoBuffer[9];
+            teapotPacket[8] = fifoBuffer[12];
+            teapotPacket[9] = fifoBuffer[13];
+            Serial.write(teapotPacket, 14);
+            teapotPacket[11]++; // packetCount, loops at 0xFF on purpose
+        #endif
+
+        // blink LED to indicate activity
+        blinkState = !blinkState;
+        digitalWrite(LED_PIN, blinkState);
+    } 
+    return heading;
+   
+} 
+
+//Sensor derecha
+int ultrasonico1 () 
+{ 
+  digitalWrite(ultrasonico1trig,LOW);  
+  delayMicroseconds(5);
+  digitalWrite(ultrasonico1trig, HIGH);   
+  delayMicroseconds(10);  
+ 
+  tiempo1 = pulseIn(ultrasonico1ech, HIGH);   
+
+  distancia1= int(0.017*tiempo1);  
+  
+  Serial.println("Distancia ");
+  Serial.println(distancia1);
+  Serial.println(" cm");
+  delay(1); 
+  return distancia1;
+}
+
+//Sensor frontal
+int ultrasonico2 () 
+{ 
+  digitalWrite(ultrasonico2trig,LOW);
+  delayMicroseconds(5);
+  digitalWrite(ultrasonico2trig, HIGH); 
+  delayMicroseconds(10);  
+ 
+  tiempo1 = pulseIn(ultrasonico2ech, HIGH);   
+
+  distancia1= int(0.017*tiempo1);  
+  
+  Serial.println("Distancia ");
+  Serial.println(distancia1);
+  Serial.println(" cm");
+  return distancia1;
+  delay(1);
+} 
+
+//Motores movimientos
+void adelante() 
+{ 
+  analogWrite(DerechaAdelante, VelDerecha);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, VelIzquierda);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+} 
+void adelantelento()
+{
+  analogWrite(DerechaAdelante, (VelDerecha/2) + 85);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, (VelIzquierda/2));  
+  analogWrite(IzquierdaAtras, LOW); 
+}
+void detenerse() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+  delay(75); 
+  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, VelDerecha);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, VelIzquierda);  
+
+  delay(75); 
+
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+} 
+
+void detenerselento()
+{
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+
+  delay(75);
+  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, (VelDerecha)*.5);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, (VelIzquierda)*.3); 
+
+  delay(75);
+
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+}
+void pararVuelta()
+{
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, LOW); 
+}
+void derecha() 
+{  
+  analogWrite(DerechaAdelante, (VelDerecha*.5));  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, (VelIzquierda*.5));
+  
+} 
+void izquierda() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, (VelDerecha*.5));  
+  analogWrite(IzquierdaAdelante, (VelIzquierda*.5));  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+}
+
+void adelante30() 
+{ 
+  adelantelento(); 
+  delay(500); 
+  detenerselento();
+}
+
+void izquierda90()
+{
+  int g1=MPU();
+  int g2=g1 - 84;
+  if(g2 < 0)
+  {
+    g2 += 360;
+  }
+  bool cont = false;
+
+  while(cont == false)
+  {
+    if (g1 > g2)
+    {
+      izquierda();
+      g1=MPU();
+      if(g1 <= g2)
+      {
+        cont = true;
+      }
+    }
+    else if(g1 < g2)
+    {
+      izquierda();
+      g1=MPU();
+    }
+  }
+  pararVuelta();
+}
+
+void derecha90()
+{
+  int g1 = MPU();
+  int g2 = g1 + 84;
+  if(g2 > 360)
+  {
+    g2 -= 360;
+  }
+  bool cont = false;
+  while (cont == false)
+  {
+    if(g1 < g2)
+    {
+      derecha();
+      g1 = MPU();
+      if(g1 >= g2)
+      {
+        cont = true; 
+      }
+    }
+    else if(g1 > g2)
+    {
+      derecha();
+      g1=MPU();
+    }
+  }
+  pararVuelta();
+  g1=MPU();
+}
+
+void adelanteMPU()
+{
+  int g1 = MPU();
+  int g2 = g1 + 3;
+  if(g2 > 360)
+  {
+    g2 -= 360;
+  }
+  int g3 = g1 - 3;
+  if(g3 < 0)
+  {
+    g2 += 360;
+  }
+  
+  if(g1 > g2)
+  {
+    int iI = 0;
+    while(g2 < g1)
+    {
+      analogWrite(DerechaAdelante, ((VelDerecha/2) + 50 ) + iI);  
+      analogWrite(DerechaAtras, LOW);  
+      analogWrite(IzquierdaAdelante, (VelIzquierda/2));  
+      analogWrite(IzquierdaAtras, LOW);
+      iI++;
+      g1 = MPU();
+    }
+  }
+  else if(g1 < g3)
+  {
+    int iI = 0;
+    while(g2 > g1)
+    {
+      analogWrite(DerechaAdelante,((VelDerecha/2)+ 50));  
+      analogWrite(DerechaAtras, LOW);  
+      analogWrite(IzquierdaAdelante, (VelIzquierda/2) + iI);  
+      analogWrite(IzquierdaAtras, LOW);
+      g1 = MPU();
+    }
+  }
+  else
+  {
+       
+      analogWrite(DerechaAdelante, (VelDerecha/2) + 50);  
+      analogWrite(DerechaAtras, LOW);  
+      analogWrite(IzquierdaAdelante, (VelIzquierda/2));  
+      analogWrite(IzquierdaAtras, LOW);
+  }
+}
+
+String color()  
+{    
+  //Serial.println("Entra a color() ");
+  digitalWrite(s2, LOW);  
+  digitalWrite(s3, LOW);  
+  //count OUT, pRed, RED  
+  red = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);  
+  digitalWrite(s3, HIGH);  
+  //count OUT, pBLUE, BLUE  
+  blue = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);  
+  digitalWrite(s2, HIGH);  
+  //count OUT, pGreen, GREEN  
+  green = pulseIn(out, digitalRead(out) == HIGH ? LOW : HIGH);
+
+
+   if ((green >= 10 && green <= 30) && (blue >= 3 && blue <= 20) && (red >= 18 &&  red <= 30))
+  {
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
+    colon = "white";
+    
+  }
+  else if ((green > 50 && green < 70) && (blue > 45 && blue < 60) && (red > 85 &&  red < 100))
+  {
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
+    colon = "green";
+    digitalWrite(LedG, HIGH);
+  }
+  else if ((green > 80 && green < 110) && (blue > 50 && blue < 70) && (red > 100 &&  red < 120))
+  {
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
+    colon = "black";
+  }
+  else if ((green > 60 && green < 70) && (blue > 38 && blue < 51) && (red > 30 &&  red < 40))
+  {
+    digitalWrite(LedR, LOW);
+    digitalWrite(LedG, LOW);
+    digitalWrite(LedB, LOW);
+    colon = "red";
+    digitalWrite(LedR, HIGH);
+  }
+  return colon;
+}
+
+void Empieza()
+{
+  int iDistancia = ultrasonico2();
+  String sColor = color();
+  while (iDistancia > 9)
+  {
+    adelantelento();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    sColor = color();
+    iDistancia = ultrasonico2();
+    Serial.println("iDistancia: ");
+    Serial.println(iDistancia);
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  bool Listo = false;
+  while(Listo == false)
+  {
+     if (sColor == "red")
+     {
+       izquierda90();
+       delay(10);
+       izquierda90();
+       delay(10);
+       izquierda90();
+       delay(10);
+       Listo = true;
+     }
+     else 
+     {
+       derecha90();
+       Listo = true;
+     }
+     pararVuelta();
+     delay(100);
+  }
+}
+
+void FinDer()
+{
+  adelante30();
+  detenerse();
+  delay(100);
+  String sColor = color();
+  bool Listo = false;
+  while(Listo == false)
+  {
+      if (sColor == "red")
+      {
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        Listo = true;
+      }
+      else 
+      {
+        derecha90();
+        Listo = true;
+      }
+      pararVuelta();
+      delay(100);
+  }
+}
+
+void FinIzq()
+{
+  String sColor = color();
+  bool Listo = false;
+  while(Listo == false)
+  {
+     if(sColor == "green")
+     {
+       derecha90();
+       delay(10);
+       derecha90();
+       delay(10);
+       derecha90();
+       delay(10);
+       Listo == true;
+     }
+     else
+     {
+       izquierda90();
+       delay(10);
+       Listo = true;
+     }
+     detenerse();
+     delay(100);
+   }
+}
+
+
+
+void continua()
+{
+  int iDistancia = ultrasonico2();
+  String sColor = color();
+  while (iDistancia > 5)
+  {
+    adelantelento();
+
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+    iDistancia = ultrasonico2();
+    sColor = color();
+  }
+  detenerse();
+  delay(10);
+  sColor = color();
+  bool Listo = false;
+  while (Listo == false)
+  {
+      if(sColor == "green")
+      {
+        derecha90();
+        delay(10);
+        derecha90();
+        delay(10);
+        derecha90();
+        delay(10);
+        Listo = true;
+      }
+      else
+      {
+        izquierda90();
+        delay(10);
+        Listo = true;
+      }
+  }
+  pararVuelta();
+  delay(10);
+  adelante30();
+  detenerse();
+  delay(10);
+}
+
+void regreso()
+{
+  String sColor = color();
+  bool Listo = false;
+  while (Listo == false)
+  {
+      if (sColor == "red")
+      {
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        izquierda90();
+        delay(10);
+        pararVuelta();
+        delay(100);
+        Listo = true;
+      }
+      else
+      {
+        derecha90();
+        pararVuelta();
+        delay(100);
+        Listo = true;
+      }
+      sColor = color();
+  }
+  sColor = color();
+  while (sColor != "plateado")
+  {
+    adelantelento();
+    sColor = color();
+    if (sColor == "red")
+    {
+      digitalWrite(LedR, HIGH);
+    }
+    if (sColor == "green")
+    {
+      digitalWrite(LedG, HIGH);
+    }
+  }
+  detenerse();
+  delay(100);
+} 
+
+void SecUno()
+{
+  delay(100);
+  Empieza();
+  delay(100);
+  FinDer();
+  delay(100);
+  continua();
+  delay(100);
+  FinIzq();
+  delay(100);
+  Empieza();
+  delay(100);
+  FinDer();
+  delay(100);
+  continua();
+  delay(100);
+  regreso();
+}
+void zonaB()
+{
+  int der=ultrasonico1();
+  delay(10);
+  int fr=ultrasonico2(); 
+  int Distancia = MPU();
+
+  Serial.println("Der: ");
+  Serial.println(der);
+  Serial.println("Fr: ");
+  Serial.println(fr);
+
+  if (cont>=2)
+  {
+    adelante30();
+    cont=0;
+    delay(250);
+  }
+
+  else if(der == 0 || fr == 0)
+  {
+    delay(250);
+    der = ultrasonico1();
+    delay(1);
+    fr = ultrasonico2();
+    cont=0;
+  }
+  else if (der > 7) // Derecha
+  {
+    Distancia = MPU();
+
+    if(Distancia < 3 || Distancia > 357)
+    {
+      while(Distancia < 89 || Distancia > 92)
+      {
+        derecha();
+        Distancia = MPU();
+      }
+    }
+    else if(Distancia > 87 && Distancia < 93)
+    {
+      while(Distancia < 179)
+      {
+        derecha();
+        Distancia = MPU();
+      }
+    }
+    else if(Distancia > 175 && Distancia < 185)
+    {
+      while(Distancia < 269)
+      {
+        derecha();
+        Distancia = MPU();
+      }
+    }
+    else if(Distancia > 266 && Distancia < 275)
+    {
+      while(Distancia < 355 || (Distancia > 0 && Distancia < 8))
+      {
+        derecha();
+        Distancia = MPU();
+      }
+    }
+   //derecha90();
+   pararVuelta();
+   delay(250);
+   fr=ultrasonico2();
+     delay(100);
+     if(fr > 15)
+     {
+      adelante30();
+     }
+     /*while(fr > 13)
+     {
+      adelantelento();
+      fr=ultrasonico2();
+      
+     }*/
+     //adelante30();
+    //detenerselento();  
+   delay(250);
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+   cont=0;
+   }
+  else if( fr > 20 && cont<2) // Avanza al frente
+  {
+     while(fr > 20)
+     {
+      adelantelento();
+      fr=ultrasonico2();
+      
+     }
+    detenerselento();  
+   cont=0;
+   delay(250);
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+  }
+  
+  else if (der <= 9 && fr <= 13) // Izquierda
+  {
+    Distancia = MPU();
+    if(Distancia < 5 || Distancia > 355)
+    {
+      while(Distancia > 273 || Distancia < 268)
+      {
+        izquierda();
+        Distancia = MPU();
+      }
+    }
+    else if(Distancia > 87 && Distancia < 93)
+    {
+      while(Distancia > 2 || (Distancia < 360 && Distancia > 357))
+      {
+        izquierda();
+        Distancia = MPU();
+      }
+    }
+    else if(Distancia > 177 && Distancia < 183)
+    {
+      while(Distancia > 92)
+      {
+        izquierda();
+        Distancia = MPU();
+      }
+    }
+    else if(Distancia > 265 && Distancia < 275)
+    {
+      while(Distancia > 183)
+      {
+        izquierda();
+        Distancia = MPU();
+      }
+    }
+    //izquierda90();
+    pararVuelta();
+   cont++;
+    delay(250);
+   der=ultrasonico1(); 
+   fr=ultrasonico2();
+  }
+}
+
+void loop () 
+{
+  zonaB();
+}
