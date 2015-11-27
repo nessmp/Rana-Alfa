@@ -1,0 +1,429 @@
+void loop () 
+{
+  int mp = MPU();
+  int mp2;
+  int mp3;
+  
+ adelantelento();//PRIMERA LINEA
+ delay(1800);
+ detenerselento();
+ 
+ delay(1000);//PRIMER VUELTA
+ mp = MPU();
+ mp2= mp + 90;
+ if(mp2 > 359)
+ {
+  mp2 -= 360;
+ }
+ mp3 = mp + 98;
+ if(mp3 > 359)
+ {
+  mp3 -= 360;
+ }
+ bool listo = false;
+ while(listo == false)
+ {
+  if(mp >= mp2 && mp <= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp < mp2)
+  {
+     while(mp < mp2)
+     {
+         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp > mp3)
+   {
+      while(mp > mp3)
+     {
+        analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+}
+ detenerselento();
+ adelante();
+ delay(500);
+ detenerselento();
+
+ mp = MPU();//SEGUNDA
+ mp2= mp + 90;
+ if(mp2 > 359)
+ {
+  mp2 -= 360;
+ }
+ mp3 = mp + 98;
+ if(mp3 > 359)
+ {
+  mp3 -= 360;
+ }
+ 
+ listo = false;
+ while(listo == false)
+ {
+  if(mp >= mp2 && mp <= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp < mp2)
+  {
+     while(mp < mp2)
+     {
+         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp > mp3)
+   {
+      while(mp > mp3)
+     {
+        analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+}
+delay(1000);
+
+ adelantelento();//SEGUNDA LINEA
+ delay(1800);
+ detenerselento();
+
+ mp = MPU();//PRIMER IZQUIERDA
+ mp2 = mp - 90;
+ if(mp2 < 0)
+ {
+  mp2 += 360;
+ }
+ mp3 = mp - 98;
+ if(mp3 < 0)
+ {
+  mp3 += 360;
+ }
+ 
+ listo = false;
+ while(listo == false)
+ {
+  mp = MPU();
+  if(mp <= mp2 && mp >= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp > mp2)
+  {
+     while(mp > mp2)
+     {
+         analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp < mp3)
+   {
+      while(mp < mp3)
+     {
+        analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4)); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+   mp = MPU();
+}
+delay(1000);
+adelantelento();
+delay(600);
+detenerselento();
+delay(250);
+
+mp = MPU();//PRIMER IZQUIERDA
+ mp2 = mp - 90;
+ if(mp2 < 0)
+ {
+  mp2 += 360;
+ }
+ mp3 = mp - 98;
+ if(mp3 < 0)
+ {
+  mp3 += 360;
+ }
+ 
+ listo = false;
+ while(listo == false)
+ {
+  mp = MPU();
+  if(mp <= mp2 && mp >= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp > mp2)
+  {
+     while(mp > mp2)
+     {
+         analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp < mp3)
+   {
+      while(mp < mp3)
+     {
+        analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4)); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+   mp = MPU();
+}
+delay(1000);
+
+
+/*--------------------------------------------------
+//COMIENZA PARTE 2 COMIENZA PARTE 2 COMIENZA PARTE 2
+--------------------------------------------------*/
+
+
+ adelantelento();//PRIMERA LINEA
+ delay(1800);
+ detenerselento();
+ 
+ delay(1000);//PRIMER VUELTA
+ mp = MPU();
+ mp2= mp + 90;
+ if(mp2 > 359)
+ {
+  mp2 -= 360;
+ }
+ mp3 = mp + 98;
+ if(mp3 > 359)
+ {
+  mp3 -= 360;
+ }
+ listo = false;
+ while(listo == false)
+ {
+  if(mp >= mp2 && mp <= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp < mp2)
+  {
+     while(mp < mp2)
+     {
+         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp > mp3)
+   {
+      while(mp > mp3)
+     {
+        analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+}
+
+ detenerselento();
+ adelante();
+ delay(500);
+ detenerselento();
+ delay(500);
+
+ mp = MPU();//SEGUNDA
+ mp2= mp + 90;
+ if(mp2 > 359)
+ {
+  mp2 -= 360;
+ }
+ mp3 = mp + 98;
+ if(mp3 > 359)
+ {
+  mp3 -= 360;
+ }
+ 
+ listo = false;
+ while(listo == false)
+ {
+  if(mp >= mp2 && mp <= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp < mp2)
+  {
+     while(mp < mp2)
+     {
+         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp > mp3)
+   {
+      while(mp > mp3)
+     {
+        analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+}
+delay(1000);
+
+ adelantelento();//SEGUNDA LINEA
+ delay(1800);
+ detenerselento();
+
+mp = MPU();//SEGUNDA
+ mp2= mp + 90;
+ if(mp2 > 359)
+ {
+  mp2 -= 360;
+ }
+ mp3 = mp + 98;
+ if(mp3 > 359)
+ {
+  mp3 -= 360;
+ }
+ 
+ listo = false;
+ while(listo == false)
+ {
+  if(mp >= mp2 && mp <= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp < mp2)
+  {
+     while(mp < mp2)
+     {
+         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp > mp3)
+   {
+      while(mp > mp3)
+     {
+        analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+}
+
+mp = MPU();//SEGUNDA
+ mp2= mp + 90;
+ if(mp2 > 359)
+ {
+  mp2 -= 360;
+ }
+ mp3 = mp + 98;
+ if(mp3 > 359)
+ {
+  mp3 -= 360;
+ }
+ 
+ listo = false;
+ while(listo == false)
+ {
+  if(mp >= mp2 && mp <= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp < mp2)
+  {
+     while(mp < mp2)
+     {
+         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp > mp3)
+   {
+      while(mp > mp3)
+     {
+        analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.4));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(IzquierdaAtras, LOW); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+}
+adelantelento();
+delay(10000);
+
+}
