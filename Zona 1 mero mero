@@ -5,7 +5,11 @@ void loop ()
   int mp3;
   
  adelantelento();//PRIMERA LINEA
- delay(1800);
+ for(int iI = 0; iI < 1400; iI++)
+ {
+  delay(1);
+  color();
+ }
  detenerselento();
  
  delay(1000);//PRIMER VUELTA
@@ -32,10 +36,10 @@ void loop ()
   {
      while(mp < mp2)
      {
-         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48));
        mp = MPU();
      }
      detenerselento();
@@ -46,8 +50,8 @@ void loop ()
       while(mp > mp3)
      {
         analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
         mp = MPU();
      }
@@ -83,10 +87,10 @@ void loop ()
   {
      while(mp < mp2)
      {
-         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48));
        mp = MPU();
      }
      detenerselento();
@@ -97,8 +101,8 @@ void loop ()
       while(mp > mp3)
      {
         analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
         mp = MPU();
      }
@@ -137,8 +141,8 @@ delay(1000);
      while(mp > mp2)
      {
          analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
        mp = MPU();
      }
@@ -149,10 +153,10 @@ delay(1000);
    {
       while(mp < mp3)
      {
-        analogWrite(DerechaAdelante, (VelDerecha*.40));  
+        analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4)); 
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48)); 
         mp = MPU();
      }
      detenerselento();
@@ -171,7 +175,7 @@ mp = MPU();//PRIMER IZQUIERDA
  {
   mp2 += 360;
  }
- mp3 = mp - 98;
+ mp3 = mp - 96;
  if(mp3 < 0)
  {
   mp3 += 360;
@@ -180,7 +184,7 @@ mp = MPU();//PRIMER IZQUIERDA
  listo = false;
  while(listo == false)
  {
-  mp = MPU();
+  
   if(mp <= mp2 && mp >= mp3)
   {
     listo = true;
@@ -191,8 +195,8 @@ mp = MPU();//PRIMER IZQUIERDA
      while(mp > mp2)
      {
          analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
        mp = MPU();
      }
@@ -203,10 +207,10 @@ mp = MPU();//PRIMER IZQUIERDA
    {
       while(mp < mp3)
      {
-        analogWrite(DerechaAdelante, (VelDerecha*.40));  
+        analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4)); 
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48)); 
         mp = MPU();
      }
      detenerselento();
@@ -222,7 +226,7 @@ delay(1000);
 
 
  adelantelento();//PRIMERA LINEA
- delay(1800);
+ delay(1650);
  detenerselento();
  
  delay(1000);//PRIMER VUELTA
@@ -249,10 +253,10 @@ delay(1000);
   {
      while(mp < mp2)
      {
-         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48));
        mp = MPU();
      }
      detenerselento();
@@ -263,8 +267,8 @@ delay(1000);
       while(mp > mp3)
      {
         analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
         mp = MPU();
      }
@@ -274,7 +278,7 @@ delay(1000);
 
  detenerselento();
  adelante();
- delay(500);
+ delay(700);
  detenerselento();
  delay(500);
 
@@ -302,10 +306,10 @@ delay(1000);
   {
      while(mp < mp2)
      {
-         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48));
        mp = MPU();
      }
      detenerselento();
@@ -316,8 +320,8 @@ delay(1000);
       while(mp > mp3)
      {
         analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
         mp = MPU();
      }
@@ -327,7 +331,7 @@ delay(1000);
 delay(1000);
 
  adelantelento();//SEGUNDA LINEA
- delay(1800);
+ delay(1750);
  detenerselento();
 
 mp = MPU();//SEGUNDA
@@ -354,10 +358,10 @@ mp = MPU();//SEGUNDA
   {
      while(mp < mp2)
      {
-         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48));
        mp = MPU();
      }
      detenerselento();
@@ -368,8 +372,8 @@ mp = MPU();//SEGUNDA
       while(mp > mp3)
      {
         analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
         mp = MPU();
      }
@@ -401,10 +405,10 @@ mp = MPU();//SEGUNDA
   {
      while(mp < mp2)
      {
-         analogWrite(DerechaAdelante, (VelDerecha*.40));  
+         analogWrite(DerechaAdelante, (VelDerecha*.48));  
          analogWrite(DerechaAtras, LOW);  
          analogWrite(IzquierdaAdelante, LOW);  
-         analogWrite(IzquierdaAtras, (VelIzquierda*.4));
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48));
        mp = MPU();
      }
      detenerselento();
@@ -415,8 +419,8 @@ mp = MPU();//SEGUNDA
       while(mp > mp3)
      {
         analogWrite(DerechaAdelante, LOW);  
-        analogWrite(DerechaAtras, (VelDerecha*.4));  
-        analogWrite(IzquierdaAdelante, (VelIzquierda*.4));  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
         analogWrite(IzquierdaAtras, LOW); 
         mp = MPU();
      }
@@ -424,6 +428,15 @@ mp = MPU();//SEGUNDA
    }
 }
 adelantelento();
-delay(10000);
+delay(1750);
+derecha();
+delay(400);
+adelantelento();
+delay(100);
+izquierda();
+delay(300);
+adelantelento();
+delay(170);
+
 
 }
