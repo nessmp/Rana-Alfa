@@ -535,6 +535,14 @@ void derecha()
   analogWrite(IzquierdaAtras, (VelIzquierda*.5));
   
 } 
+void derechaB() 
+{  
+  analogWrite(DerechaAdelante, (VelDerecha)*.6);  
+  analogWrite(DerechaAtras, LOW);  
+  analogWrite(IzquierdaAdelante, LOW);  
+  analogWrite(IzquierdaAtras, (VelIzquierda)*.6);
+  
+} 
 void izquierda() 
 {  
   analogWrite(DerechaAdelante, LOW);  
@@ -543,11 +551,19 @@ void izquierda()
   analogWrite(IzquierdaAtras, LOW); 
   
 }
+void izquierdaB() 
+{  
+  analogWrite(DerechaAdelante, LOW);  
+  analogWrite(DerechaAtras, (VelDerecha)*.6);  
+  analogWrite(IzquierdaAdelante, (VelIzquierda)*.6);  
+  analogWrite(IzquierdaAtras, LOW); 
+  
+}
 
 void adelante30() 
 { 
   adelantelento(); 
-  delay(500); 
+  delay(530); 
   detenerselento();
 }
 
@@ -604,6 +620,65 @@ void derecha90()
     else if(g1 > g2)
     {
       derecha();
+      g1=MPU();
+    }
+  }
+  pararVuelta();
+  g1=MPU();
+}
+void izquierda90B()
+{
+  int g1=MPU();
+  int g2=g1 - 79;
+  if(g2 < 0)
+  {
+    g2 += 360;
+  }
+  bool cont = false;
+
+  while(cont == false)
+  {
+    if (g1 > g2)
+    {
+      izquierdaB();
+      g1=MPU();
+      if(g1 <= g2)
+      {
+        cont = true;
+      }
+    }
+    else if(g1 < g2)
+    {
+      izquierdaB();
+      g1=MPU();
+    }
+  }
+  pararVuelta();
+}
+
+void derecha90B()
+{
+  int g1 = MPU();
+  int g2 = g1 + 81;
+  if(g2 > 360)
+  {
+    g2 -= 360;
+  }
+  bool cont = false;
+  while (cont == false)
+  {
+    if(g1 < g2)
+    {
+      derechaB();
+      g1 = MPU();
+      if(g1 >= g2)
+      {
+        cont = true; 
+      }
+    }
+    else if(g1 > g2)
+    {
+      derechaB();
       g1=MPU();
     }
   }
@@ -932,7 +1007,6 @@ void zonaB()
   int der=ultrasonico1();
   delay(10);
   int fr=ultrasonico2(); 
-  int Distancia = MPU();
 
   Serial.println("Der: ");
   Serial.println(der);
@@ -941,9 +1015,11 @@ void zonaB()
 
   if (cont>=2)
   {
-    adelante30();
+    adelantelento(); 
+  delay(600); 
+  detenerselento();
     cont=0;
-    delay(250);
+    delay(300);
   }
 
   else if(der == 0 || fr == 0)
@@ -954,67 +1030,29 @@ void zonaB()
     fr = ultrasonico2();
     cont=0;
   }
-  else if (der > 7) // Derecha
+  else if (der > 9) // Derecha
   {
-    Distancia = MPU();
-
-    if(Distancia < 3 || Distancia > 357)
-    {
-      while(Distancia < 89 || Distancia > 92)
-      {
-        derecha();
-        Distancia = MPU();
-      }
-    }
-    else if(Distancia > 87 && Distancia < 93)
-    {
-      while(Distancia < 179)
-      {
-        derecha();
-        Distancia = MPU();
-      }
-    }
-    else if(Distancia > 175 && Distancia < 185)
-    {
-      while(Distancia < 269)
-      {
-        derecha();
-        Distancia = MPU();
-      }
-    }
-    else if(Distancia > 266 && Distancia < 275)
-    {
-      while(Distancia < 355 || (Distancia > 0 && Distancia < 8))
-      {
-        derecha();
-        Distancia = MPU();
-      }
-    }
-   //derecha90();
+   derecha90B();
    pararVuelta();
    delay(250);
    fr=ultrasonico2();
      delay(100);
-     if(fr > 15)
-     {
-      adelante30();
-     }
      /*while(fr > 13)
      {
       adelantelento();
       fr=ultrasonico2();
       
      }*/
-     //adelante30();
+     adelante30();
     //detenerselento();  
    delay(250);
    der=ultrasonico1(); 
    fr=ultrasonico2();
    cont=0;
    }
-  else if( fr > 20 && cont<2) // Avanza al frente
+  else if( fr > 7 && cont<2) // Avanza al frente
   {
-     while(fr > 20)
+     while(fr > 7)
      {
       adelantelento();
       fr=ultrasonico2();
@@ -1026,52 +1064,21 @@ void zonaB()
    der=ultrasonico1(); 
    fr=ultrasonico2();
   }
-  
-  else if (der <= 9 && fr <= 13) // Izquierda
+  else if (der <= 9 && fr <= 7) // Izquierda
   {
-    Distancia = MPU();
-    if(Distancia < 5 || Distancia > 355)
-    {
-      while(Distancia > 273 || Distancia < 268)
-      {
-        izquierda();
-        Distancia = MPU();
-      }
-    }
-    else if(Distancia > 87 && Distancia < 93)
-    {
-      while(Distancia > 2 || (Distancia < 360 && Distancia > 357))
-      {
-        izquierda();
-        Distancia = MPU();
-      }
-    }
-    else if(Distancia > 177 && Distancia < 183)
-    {
-      while(Distancia > 92)
-      {
-        izquierda();
-        Distancia = MPU();
-      }
-    }
-    else if(Distancia > 265 && Distancia < 275)
-    {
-      while(Distancia > 183)
-      {
-        izquierda();
-        Distancia = MPU();
-      }
-    }
-    //izquierda90();
+    izquierda90B();
     pararVuelta();
    cont++;
-    delay(250);
+    delay(500);
    der=ultrasonico1(); 
    fr=ultrasonico2();
   }
+
 }
 
 void loop () 
 {
-  zonaB();
+ zonaB();
+ 
+  
 }
