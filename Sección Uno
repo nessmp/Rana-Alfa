@@ -1,0 +1,222 @@
+bool primera = false;
+
+void zonaA()
+{
+  int enf = ultrasonico2();
+  String col = color();
+  primera = true;
+  bool segunda = false;
+  bool tercera = false;
+  bool cuarta = false;
+  
+  if(primera = true)
+  {
+  if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
+      {
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+      }
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "red")
+      {
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
+      }
+      else
+      {
+        derecha90();
+      }
+      delay(300);
+      adelante30();
+      delay(300);
+      col = color();
+      if(col == "red")
+      {
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+      }
+      else
+      {
+        derecha90();
+      }
+      primera = false;
+      segunda = true;
+   }
+  }
+  
+  if(segunda == true)
+  {
+    delay(300);
+    if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
+      {
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+      }
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "green")
+      {
+         derecha90();
+         delay(300);
+         derecha90();
+         delay(300);
+         derecha90();
+         delay(300);
+      }
+      else
+      {
+        izquierda90();
+      }
+      delay(300);
+      adelante30();
+      delay(300);
+      col = color();
+      if(col == "green")
+      {
+        derecha90();
+        delay(300);
+        derecha90();
+        delay(300);
+        derecha90();
+        delay(300);
+      }
+      else
+      {
+        izquierda90();
+      }
+      segunda = false;
+      tercera = true;
+   }
+   }
+   
+   if(tercera == true)
+   {
+    delay(300);
+    if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
+      {
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+      }
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "red")
+      {
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
+         izquierda90();
+         delay(300);
+      }
+      else
+      {
+        derecha90();
+      }
+      delay(300);
+      adelante30();
+      delay(300);
+      col = color();
+      if(col == "red")
+      {
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+      }
+      else
+      {
+        derecha90();
+      }
+      tercera = false;
+      cuarta = true;
+   }
+   }
+   
+   if(cuarta == true)
+   {
+    enf = ultrasonico2();
+    delay(300);
+    if(enf == 0)
+     {
+       delay(250);
+       enf = ultrasonico2();
+     }
+   else if(enf > 29)
+   {
+      while( enf > 29)
+      {
+        color();
+        adelantelento();
+        enf = ultrasonico2();
+        color();
+      }
+      detenerselento();
+      delay(250);
+      col = color();
+      if(col == "red")
+      {
+        izquierda90();
+        delay(300);
+        izquierda90();
+        delay(300);
+      }
+      else
+      {
+        derecha90();
+        delay(300);
+        derecha90();
+        delay(300);
+      }
+      delay(300);
+      col = color();
+      while(col != "plateado")
+      {
+        adelantelento();
+        col = color();
+      }
+      detenerse();
+      cuarta =false;
+   }
+   }  
+}
