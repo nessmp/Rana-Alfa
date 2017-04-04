@@ -1,0 +1,265 @@
+void izqA90()
+{
+  int mp;
+  int mp2;
+  int mp3;
+  bool listo = false;
+   mp = MPU();//PRIMER IZQUIERDA
+   mp2 = mp - 90;
+ if(mp2 < 0)
+ {
+  mp2 += 360;
+ }
+ mp3 = mp - 98;
+ if(mp3 < 0)
+ {
+  mp3 += 360;
+ }
+ 
+ listo = false;
+ while(listo == false)
+ {
+  mp = MPU();
+  if(mp <= mp2 && mp >= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp > mp2)
+  {
+     while(mp > mp2)
+     {
+         analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
+        analogWrite(IzquierdaAtras, LOW); 
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp < mp3)
+   {
+      while(mp < mp3)
+     {
+        analogWrite(DerechaAdelante, LOW);  
+        analogWrite(DerechaAtras, (VelDerecha*.48));  
+        analogWrite(IzquierdaAdelante, (VelIzquierda*.48));  
+        analogWrite(IzquierdaAtras, LOW); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+   mp = MPU();
+}
+}
+
+void derA90()
+{
+  int mp;
+  int mp2;
+  int mp3;
+  bool listo = false;
+  mp = MPU();
+ mp2= mp + 90;
+ if(mp2 > 359)
+ {
+  mp2 -= 360;
+ }
+ mp3 = mp + 98;
+ if(mp3 > 359)
+ {
+  mp3 -= 360;
+ }
+ listo = false;
+ while(listo == false)
+ {
+  if(mp >= mp2 && mp <= mp3)
+  {
+    listo = true;
+  }
+  
+  else if(mp < mp2)
+  {
+     while(mp < mp2)
+     {
+         analogWrite(DerechaAdelante, (VelDerecha*.48));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48));
+       mp = MPU();
+     }
+     detenerselento();
+  }
+  
+   else if(mp > mp3)
+   {
+      while(mp > mp3)
+     {
+        analogWrite(DerechaAdelante, (VelDerecha*.48));  
+         analogWrite(DerechaAtras, LOW);  
+         analogWrite(IzquierdaAdelante, LOW);  
+         analogWrite(IzquierdaAtras, (VelIzquierda*.48)); 
+        mp = MPU();
+     }
+     detenerselento();
+   }
+}
+}
+void giraDerA()
+{
+  String color;
+  color=sensorcolor();
+  if (color=="red")
+  {
+    izqA90();
+    delay(500);
+    izqA90();
+    delay(500);
+    izqA90();
+    delay(500);
+  }
+  else 
+  {
+    derA90();
+    delay(500);
+  }
+  
+}
+void giraIzqA()
+{
+  String color;
+  color=sensorcolor();
+  if (color=="green")
+  {
+    derA90();
+    delay(500);
+    derA90();
+    delay(500);
+    derA90();
+    delay(500);
+  }
+  else 
+  {
+    izqA90();
+    delay(500);
+  }
+  
+}
+
+void zonaA()
+{
+   int mp = MPU();
+  int mp2;
+  int mp3;
+  bool listo;
+  String color;
+  
+ adelantelento();//PRIMERA LINEA
+ for(int iI = 0; iI < 50; iI++)
+ {
+  delay(1);
+ color2();
+ }
+ detenerselento();
+
+  color2();
+ delay(1000);//PRIMER VUELTA
+ 
+ giraDerA();
+ 
+ adelante();
+ delay(500);
+ detenerselento();
+
+ color2(); 
+delay(1000);//SEGUNDA VUELTA
+giraDerA();
+
+ adelantelento();//SEGUNDA LINEA
+ for(int iI = 0; iI < 1600; iI++)
+ {
+  delay(1);
+  color2();
+ }
+ detenerselento();
+  color2();
+delay (500);//TERCERA VUELTA 
+ giraIzqA();
+delay(1000);
+
+adelantelento();
+delay(600);
+detenerselento();
+delay(250);
+ color2();
+giraIzqA();
+delay(250);
+
+/*--------------------------------------------------
+//COMIENZA PARTE 2 COMIENZA PARTE 2 COMIENZA PARTE 2
+--------------------------------------------------*/
+
+
+ adelantelento();//TERCERA LINEA
+ for(int iI = 0; iI < 1450; iI++)
+ {
+  delay(1);
+  color2();
+ }
+ detenerselento();
+
+  color2();
+ delay(1000);// QUINTA VUELTA
+ giraDerA();
+
+ detenerselento();
+ adelante();
+ delay(700);
+ detenerselento();
+
+ color2();
+ delay(500);// SEXTA VUELTA
+giraDerA();
+delay(1000);
+
+  adelantelento();//CUARTA LINEA
+ for(int iI = 0; iI < 1550; iI++)
+ {
+  delay(1);
+  color2();
+ }
+ detenerselento();
+
+ color2();
+ delay(250);//180 GRADOS
+ giraDerA();
+ delay(250);
+ giraDerA();
+delay (250);
+
+adelantelento();
+delay(1750);
+derecha();
+delay(400);
+adelantelento();
+delay(100);
+izquierda();
+delay(300);
+adelantelento();
+delay(170);
+
+
+
+}
+
+void loop () 
+{
+ 
+zonaA();                         
+ 
+
+
+}
+
+
